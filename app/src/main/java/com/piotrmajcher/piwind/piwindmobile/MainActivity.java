@@ -1,61 +1,56 @@
 package com.piotrmajcher.piwind.piwindmobile;
 
+import android.app.ListActivity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.piotrmajcher.piwind.piwindmobile.adapters.StationsListAdapter;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
 import com.piotrmajcher.piwind.piwindmobile.rest.MeteoStationRestService;
 import com.piotrmajcher.piwind.piwindmobile.rest.impl.MeteoStationRestServiceImpl;
 import com.piotrmajcher.piwind.piwindmobile.util.impl.JsonToObjectParserImpl;
 
 import org.java_websocket.WebSocket;
-import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.client.StompClient;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ListActivity {
 
     private static final String TAG = MainActivity.class.getName();
     private static Context applicationContext;
     private static RequestQueue requestQueue;
-    private MeteoStationRestService meteoStationRestService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         MainActivity.applicationContext = getApplicationContext();
         MainActivity.requestQueue = Volley.newRequestQueue(MainActivity.applicationContext);
 
-        meteoStationRestService = new MeteoStationRestServiceImpl();
-        meteoStationRestService.getMeteoStationsList(new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                JsonToObjectParserImpl<MeteoStationTO> parser = new JsonToObjectParserImpl<>();
-                try {
-                    List<MeteoStationTO> meteoStationTOList = parser.parseJSONArray(response, MeteoStationTO.class);
-                    Log.i(TAG, "Meteo stations list: " + meteoStationTOList.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+        List<MeteoStationTO> stationsList = new ArrayList<>();
+        StationsListAdapter listAdapter = new StationsListAdapter(this, stationsList);
+        setListAdapter(listAdapter);
 
+        MeteoStationRestService meteoStationRestService = new MeteoStationRestServiceImpl();
+        meteoStationRestService.getMeteoStationsList(response -> {
+            JsonToObjectParserImpl<MeteoStationTO> parser = new JsonToObjectParserImpl<>();
+            try {
+                listAdapter.updateStationsList(parser.parseJSONArray(response, MeteoStationTO.class));
+            } catch (JSONException e) {
+                Log.e(TAG, "Failed to fetch the meteo stations list");
             }
+        }, error -> {
+                Log.e(TAG, error.getMessage());
         });
-        setContentView(R.layout.activity_main);
     }
 
     private class LongOperation extends AsyncTask<String, Void, String> {
