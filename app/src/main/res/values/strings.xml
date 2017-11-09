@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PiWindMobile</string>
+    <string name="loading_meteo_stations">Loading meteo stations ...</string>
 </resources>

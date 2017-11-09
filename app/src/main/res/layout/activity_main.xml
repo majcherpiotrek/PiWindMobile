@@ -9,20 +9,19 @@
     tools:context="com.piotrmajcher.piwind.piwindmobile.MainActivity">
 
     <ListView
-        android:id="@android:id/list"
+        android:id="@+id/stations_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="1"
         android:background="@android:color/background_light"
         android:drawSelectorOnTop="false"
         android:fadingEdge="vertical"
         android:fadingEdgeLength="10dp"
-        android:layout_weight="1"
-        android:listSelector="@android:color/holo_blue_light"
-        android:longClickable="true"/>
+        android:listSelector="?android:attr/colorActivatedHighlight" />
 
-    <TextView android:id="@android:id/empty"
+    <TextView android:id="@+id/loading_stations"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Loading meteo stations ..."
+        android:text="@string/loading_meteo_stations"
         android:layout_gravity="center" />
 </LinearLayout>

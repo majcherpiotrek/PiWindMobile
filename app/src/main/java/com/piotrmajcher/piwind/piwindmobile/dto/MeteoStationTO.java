@@ -1,6 +1,8 @@
 package com.piotrmajcher.piwind.piwindmobile.dto;
 
-public class MeteoStationTO {
+import java.io.Serializable;
+
+public class MeteoStationTO implements Serializable{
 
     private String id;
 

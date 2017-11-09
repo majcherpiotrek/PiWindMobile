@@ -1,10 +1,12 @@
 package com.piotrmajcher.piwind.piwindmobile;
 
-import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ListView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -23,11 +25,13 @@ import java.util.List;
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.client.StompClient;
 
-public class MainActivity extends ListActivity {
+public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getName();
     private static Context applicationContext;
     private static RequestQueue requestQueue;
+    private ListView listView;
+    public static final String SELECTED_STATION = "selected_station";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +41,14 @@ public class MainActivity extends ListActivity {
         MainActivity.requestQueue = Volley.newRequestQueue(MainActivity.applicationContext);
 
         List<MeteoStationTO> stationsList = new ArrayList<>();
-        StationsListAdapter listAdapter = new StationsListAdapter(this, stationsList);
-        setListAdapter(listAdapter);
+        final StationsListAdapter listAdapter = new StationsListAdapter(this, stationsList);
+
+        listView = (ListView) findViewById(R.id.stations_list);
+        listView.setAdapter(listAdapter);
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            MeteoStationTO selectedStation = (MeteoStationTO) listAdapter.getItem(position);
+            goToMeteoStationDetails(selectedStation);
+        });
 
         MeteoStationRestService meteoStationRestService = new MeteoStationRestServiceImpl();
         meteoStationRestService.getMeteoStationsList(response -> {
@@ -51,6 +61,12 @@ public class MainActivity extends ListActivity {
         }, error -> {
                 Log.e(TAG, error.getMessage());
         });
+    }
+
+    public void goToMeteoStationDetails(MeteoStationTO meteoStationTO) {
+        Intent intent = new Intent(this, MeteoStationDetailsActivity.class);
+        intent.putExtra(SELECTED_STATION, meteoStationTO);
+        startActivity(intent);
     }
 
     private class LongOperation extends AsyncTask<String, Void, String> {
