@@ -69,55 +69,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private class LongOperation extends AsyncTask<String, Void, String> {
-        private StompClient mStompClient;
-        String TAG="LongOperation";
-        private String stationId;
-
-        LongOperation(String stationId) {
-            super();
-            this.stationId = stationId;
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-
-            mStompClient = Stomp.over(WebSocket.class, "ws://10.0.2.2:8080/meteo-update/websocket");
-            mStompClient.connect();
-
-            mStompClient.topic("/update/updater-url").subscribe(topicMessage -> {
-                Log.i(TAG, "New update: " + topicMessage.getPayload());
-            });
-
-            mStompClient.send("/hello/start-update", this.stationId).subscribe();
-
-
-            mStompClient.lifecycle().subscribe(lifecycleEvent -> {
-                switch (lifecycleEvent.getType()) {
-
-                    case OPENED:
-                        Log.d(TAG, "Stomp connection opened");
-                        break;
-
-                    case ERROR:
-                        Log.e(TAG, "Error", lifecycleEvent.getException());
-                        break;
-
-                    case CLOSED:
-                        Log.d(TAG, "Stomp connection closed");
-                        break;
-                }
-            });
-            return "Executed";
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-
-        }
-
-    }
-
     public static Context getAppContext() {
         return MainActivity.applicationContext;
     }
