@@ -1,21 +1,22 @@
 package com.piotrmajcher.piwind.piwindmobile.dto;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 public class MeteoStationTO implements Serializable{
 
-    private String id;
+    private UUID id;
 
     private String name;
 
     private String stationBaseURL;
 
 
-    public String getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

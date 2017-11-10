@@ -6,20 +6,30 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
+import com.piotrmajcher.piwind.piwindmobile.dto.MeteoDataTO;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
+import com.piotrmajcher.piwind.piwindmobile.models.MeteoData;
+import com.piotrmajcher.piwind.piwindmobile.util.impl.JsonToObjectParserImpl;
 
 import org.java_websocket.WebSocket;
 import org.w3c.dom.Text;
 
+import java.util.UUID;
+
 import ua.naiksoftware.stomp.Stomp;
 import ua.naiksoftware.stomp.client.StompClient;
+import ua.naiksoftware.stomp.client.StompMessage;
 
 public class MeteoStationDetailsActivity extends AppCompatActivity {
 
     // TODO Close the websocket connection when going back from this activity
-    
+
     private static final String TAG = MeteoStationDetailsActivity.class.getName();
     private TextView meteoDataTextView;
+    private MeteoData meteoData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,9 +45,9 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
     private class MeteoDataUpdateOperation extends AsyncTask<String, Void, String> {
         private StompClient mStompClient;
         String TAG = MeteoDataUpdateOperation.class.getName();
-        private String stationId;
+        private UUID stationId;
 
-        MeteoDataUpdateOperation(String stationId) {
+        MeteoDataUpdateOperation(UUID stationId) {
             super();
             this.stationId = stationId;
         }
@@ -50,10 +60,14 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
 
             mStompClient.topic("/update/updater-url").subscribe(topicMessage -> {
                 Log.i(TAG, "New update: " + topicMessage.getPayload());
-                updateMeteoDataText(topicMessage.getPayload());
+                JsonParser parser = new JsonParser();
+                Gson gson = new GsonBuilder().create();
+                MeteoDataTO meteoDataTO = gson.fromJson(topicMessage.getPayload(), MeteoDataTO.class);
+                meteoData = new MeteoData(meteoDataTO);
+                updateMeteoDataText();
             });
 
-            mStompClient.send("/hello/start-update", this.stationId).subscribe();
+            mStompClient.send("/hello/start-update", this.stationId.toString()).subscribe();
 
 
             mStompClient.lifecycle().subscribe(lifecycleEvent -> {
@@ -81,9 +95,7 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void updateMeteoDataText(String updatedText) {
-        runOnUiThread(() -> {
-            meteoDataTextView.setText(updatedText);
-        });
+    private void updateMeteoDataText() {
+        runOnUiThread(() -> meteoDataTextView.setText(meteoData.toString()));
     }
 }
