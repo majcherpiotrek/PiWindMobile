@@ -1,7 +1,6 @@
 package com.piotrmajcher.piwind.piwindmobile.util.impl;
 
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
-import com.piotrmajcher.piwind.piwindmobile.util.JsonToObjectsParser;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,7 +19,7 @@ public class JsonToObjectParserImplTest {
         JsonToObjectParserImpl<MeteoStationTO> jsonToObjectsParser = new JsonToObjectParserImpl<>();
 
         MeteoStationTO meteoStationTO = new MeteoStationTO();
-        meteoStationTO.setId(UUID.randomUUID().toString());
+        meteoStationTO.setId(UUID.randomUUID());
         meteoStationTO.setName("station name");
         meteoStationTO.setStationBaseURL("http://domain.com");
 
@@ -39,12 +38,12 @@ public class JsonToObjectParserImplTest {
         JsonToObjectParserImpl<MeteoStationTO> jsonToObjectsParser = new JsonToObjectParserImpl<>();
 
         MeteoStationTO meteoStationTO = new MeteoStationTO();
-        meteoStationTO.setId(UUID.randomUUID().toString());
+        meteoStationTO.setId(UUID.randomUUID());
         meteoStationTO.setName("station name");
         meteoStationTO.setStationBaseURL("http://domain.com");
 
         MeteoStationTO meteoStationTO1 = new MeteoStationTO();
-        meteoStationTO1.setId(UUID.randomUUID().toString());
+        meteoStationTO1.setId(UUID.randomUUID());
         meteoStationTO1.setName("station name");
         meteoStationTO1.setStationBaseURL("http://domain.com");
 
