@@ -2,7 +2,6 @@ package com.piotrmajcher.piwind.piwindmobile;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -16,14 +15,12 @@ import com.piotrmajcher.piwind.piwindmobile.rest.MeteoStationRestService;
 import com.piotrmajcher.piwind.piwindmobile.rest.impl.MeteoStationRestServiceImpl;
 import com.piotrmajcher.piwind.piwindmobile.util.impl.JsonToObjectParserImpl;
 
-import org.java_websocket.WebSocket;
+
 import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ua.naiksoftware.stomp.Stomp;
-import ua.naiksoftware.stomp.client.StompClient;
 
 public class MainActivity extends AppCompatActivity {
 

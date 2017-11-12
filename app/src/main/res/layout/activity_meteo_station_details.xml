@@ -11,6 +11,11 @@
     tools:layout_editor_absoluteX="8dp"
     tools:context="com.piotrmajcher.piwind.piwindmobile.MeteoStationDetailsActivity">
 
+    <ImageView
+        android:id="@+id/snapshot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <TextView
         android:id="@+id/meteo_data_text_view"
         android:layout_width="wrap_content"

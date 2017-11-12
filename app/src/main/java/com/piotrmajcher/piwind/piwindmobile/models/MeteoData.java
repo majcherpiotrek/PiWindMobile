@@ -21,7 +21,7 @@ public class MeteoData {
     public MeteoData(MeteoDataTO meteoDataTO) {
         temperature = meteoDataTO.getTemperature();
         windSpeed = meteoDataTO.getWindSpeed();
-        date = new Date(meteoDataTO.getDateTime());
+        date = meteoDataTO.getDateTime();
         windDirectionDescription = meteoDataTO.getWindDirectionDescription();
         beaufortCategoryDescription = meteoDataTO.getBeaufortCategoryDescription();
         temperatureConditionsDescription = meteoDataTO.getTemperatureConditionsDescription();
