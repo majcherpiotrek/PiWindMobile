@@ -7,6 +7,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.piotrmajcher.piwind.piwindmobile.MainActivity;
+import com.piotrmajcher.piwind.piwindmobile.REST;
 import com.piotrmajcher.piwind.piwindmobile.rest.MeteoStationRestService;
 
 import junit.framework.Assert;
@@ -16,7 +17,7 @@ import org.json.JSONArray;
 public class MeteoStationRestServiceImpl implements MeteoStationRestService {
 
     private static final String TAG = MeteoStationRestServiceImpl.class.getName();
-    private static final String GET_STATIONS_LIST_URL = "http://10.0.2.2:8080/stations/all";
+    private static final String GET_STATIONS_LIST_URL = REST.BASE_URL + REST.GET_STATIONS_LIST_ENDPOINT;
     private RequestQueue requestQueue;
 
 

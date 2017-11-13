@@ -28,6 +28,9 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
     // TODO Close the websocket connection when going back from this activity
 
     private static final String TAG = MeteoStationDetailsActivity.class.getName();
+    private static final String UPDATE_METEO_URL = WEBSOCKET.BASE_URL + WEBSOCKET.METEO_UPDATE_ENDPOINT;
+    private static final String UPDATE_SNAPSHOTS_URL = WEBSOCKET.BASE_URL + WEBSOCKET.SNAPSHOTS_UPDATE_ENDPOINT;
+
     private TextView meteoDataTextView;
     private ImageView snapshotImageView;
     private MeteoData meteoData;
@@ -46,8 +49,8 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
         SnapshotUpdateListener snapshotUpdateListener = new SnapshotUpdateListener(meteoStationTO.getId());
         MeteoDataUpdateListener meteoDataUpdateListener = new MeteoDataUpdateListener(meteoStationTO.getId());
 
-        Request requestSnapshotUpdates = new Request.Builder().url("ws://10.0.2.2:8080/snapshots").build();
-        Request requestMeteoDataUpdates = new Request.Builder().url("ws://10.0.2.2:8080/meteo").build();
+        Request requestSnapshotUpdates = new Request.Builder().url(UPDATE_METEO_URL).build();
+        Request requestMeteoDataUpdates = new Request.Builder().url(UPDATE_SNAPSHOTS_URL).build();
 
         okhttp3.WebSocket webSocketMeteo = okHttpClient.newWebSocket(requestMeteoDataUpdates, meteoDataUpdateListener);
         okhttp3.WebSocket webSocketSnapshots = okHttpClient.newWebSocket(requestSnapshotUpdates, snapshotUpdateListener);
