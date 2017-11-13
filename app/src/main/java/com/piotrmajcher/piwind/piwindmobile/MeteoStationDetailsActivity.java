@@ -13,6 +13,9 @@ import com.google.gson.GsonBuilder;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoDataTO;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
 import com.piotrmajcher.piwind.piwindmobile.models.MeteoData;
+import com.piotrmajcher.piwind.piwindmobile.updatehandlers.UpdateHandler;
+import com.piotrmajcher.piwind.piwindmobile.websocket.MeteoDataUpdateListener;
+import com.piotrmajcher.piwind.piwindmobile.websocket.SnapshotUpdateListener;
 
 
 import java.util.UUID;
@@ -34,7 +37,6 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
     private TextView meteoDataTextView;
     private ImageView snapshotImageView;
     private MeteoData meteoData;
-    private OkHttpClient okHttpClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,93 +46,23 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
         snapshotImageView = (ImageView) findViewById(R.id.snapshot);
         MeteoStationTO meteoStationTO = (MeteoStationTO) getIntent().getSerializableExtra(MainActivity.SELECTED_STATION);
 
-        okHttpClient = new OkHttpClient();
+        OkHttpClient okHttpClient = new OkHttpClient();
 
-        SnapshotUpdateListener snapshotUpdateListener = new SnapshotUpdateListener(meteoStationTO.getId());
-        MeteoDataUpdateListener meteoDataUpdateListener = new MeteoDataUpdateListener(meteoStationTO.getId());
+        SnapshotUpdateListener snapshotUpdateListener = new SnapshotUpdateListener(
+                meteoStationTO.getId(),
+                this::updateSnapshot
+        );
+        MeteoDataUpdateListener meteoDataUpdateListener = new MeteoDataUpdateListener(
+                meteoStationTO.getId(),
+                this::updateMeteoDataText
+        );
 
-        Request requestSnapshotUpdates = new Request.Builder().url(UPDATE_METEO_URL).build();
-        Request requestMeteoDataUpdates = new Request.Builder().url(UPDATE_SNAPSHOTS_URL).build();
+        Request requestSnapshotUpdates = new Request.Builder().url(UPDATE_SNAPSHOTS_URL).build();
+        Request requestMeteoDataUpdates = new Request.Builder().url(UPDATE_METEO_URL).build();
 
         okhttp3.WebSocket webSocketMeteo = okHttpClient.newWebSocket(requestMeteoDataUpdates, meteoDataUpdateListener);
         okhttp3.WebSocket webSocketSnapshots = okHttpClient.newWebSocket(requestSnapshotUpdates, snapshotUpdateListener);
         okHttpClient.dispatcher().executorService().shutdown();
-    }
-
-    private final class MeteoDataUpdateListener extends WebSocketListener {
-        private static final int NORMAL_CLOSURE_STATUS = 1000;
-        private UUID stationId;
-
-        MeteoDataUpdateListener(UUID stationId) { this.stationId = stationId; }
-
-        @Override
-        public void onOpen(okhttp3.WebSocket webSocket, Response response) {
-            webSocket.send(stationId.toString());
-        }
-
-        @Override
-        public void onMessage(okhttp3.WebSocket webSocket, String updatedMeteoData) {
-            Log.i(TAG, "New update: " + updatedMeteoData);
-            Gson gson = new GsonBuilder().create();
-            MeteoDataTO meteoDataTO = gson.fromJson(updatedMeteoData, MeteoDataTO.class);
-            updateMeteoDataText(meteoDataTO);
-        }
-
-        @Override
-        public void onClosing(okhttp3.WebSocket webSocket, int code, String reason) {
-            webSocket.close(NORMAL_CLOSURE_STATUS, null);
-            Log.i(TAG, "Closing " + code + " " + reason);
-        }
-
-        @Override
-        public void onClosed(okhttp3.WebSocket webSocket, int code, String reason) {
-            Log.i(TAG, "Closed " + code + " " + reason);
-        }
-
-        @Override
-        public void onFailure(okhttp3.WebSocket webSocket, Throwable t, Response response) {
-            Log.i(TAG, "Error " + t.getMessage());
-        }
-    }
-
-    private final class SnapshotUpdateListener extends WebSocketListener {
-        private static final int NORMAL_CLOSURE_STATUS = 1000;
-        private UUID stationId;
-
-        SnapshotUpdateListener(UUID stationId) {
-            this.stationId = stationId;
-        }
-        @Override
-        public void onOpen(okhttp3.WebSocket webSocket, Response response) {
-            webSocket.send(stationId.toString());
-        }
-
-        @Override
-        public void onMessage(okhttp3.WebSocket webSocket, String message) {
-            Log.i(TAG, "Received message: " + message);
-        }
-
-        @Override
-        public void onMessage(okhttp3.WebSocket webSocket, ByteString bytes) {
-            Log.i(TAG, "Received bytestring message: " + bytes.size());
-            updateSnapshot(bytes.toByteArray());
-        }
-
-        @Override
-        public void onClosing(okhttp3.WebSocket webSocket, int code, String reason) {
-            webSocket.close(NORMAL_CLOSURE_STATUS, null);
-            Log.i(TAG, "Closing " + code + " " + reason);
-        }
-
-        @Override
-        public void onClosed(okhttp3.WebSocket webSocket, int code, String reason) {
-            Log.i(TAG, "Closed " + code + " " + reason);
-        }
-
-        @Override
-        public void onFailure(okhttp3.WebSocket webSocket, Throwable t, Response response) {
-            Log.i(TAG, "Error " + t.getMessage());
-        }
     }
 
     private void updateSnapshot(byte[] snapshot) {
