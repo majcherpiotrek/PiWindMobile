@@ -11,7 +11,13 @@ public class WeatherNotificationsService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        Log.i(TAG, "From: " + remoteMessage.getFrom());
-        Log.i(TAG, "Message: " + remoteMessage.getNotification().getBody());
+         if (remoteMessage.getNotification() != null) {
+             Log.e(TAG, "From: " + remoteMessage.getFrom());
+             Log.e(TAG, "Message: " + remoteMessage.getNotification().getBody());
+         }
+
+         if (remoteMessage.getData().size() > 0) {
+             Log.e(TAG, "Data: " + remoteMessage.getData());
+         }
     }
 }

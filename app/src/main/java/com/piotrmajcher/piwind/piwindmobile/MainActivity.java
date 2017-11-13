@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.piotrmajcher.piwind.piwindmobile.adapters.StationsListAdapter;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
 import com.piotrmajcher.piwind.piwindmobile.rest.MeteoStationRestService;
@@ -28,12 +30,23 @@ public class MainActivity extends AppCompatActivity {
     private static Context applicationContext;
     private static RequestQueue requestQueue;
     private ListView listView;
+    private TextView textView;
     public static final String SELECTED_STATION = "selected_station";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        textView = (TextView) findViewById(R.id.loading_stations);
+        if (getIntent().getExtras() != null) {
+
+            final String intent = getIntent().getExtras().toString();
+            runOnUiThread(() -> textView.setText(intent));
+        }
+
+        // Subscribe firebase topic
+
+        ////////////////////////////
         MainActivity.applicationContext = getApplicationContext();
         MainActivity.requestQueue = Volley.newRequestQueue(MainActivity.applicationContext);
 
@@ -51,7 +64,11 @@ public class MainActivity extends AppCompatActivity {
         meteoStationRestService.getMeteoStationsList(response -> {
             JsonToObjectParserImpl<MeteoStationTO> parser = new JsonToObjectParserImpl<>();
             try {
-                listAdapter.updateStationsList(parser.parseJSONArray(response, MeteoStationTO.class));
+                List<MeteoStationTO> meteoStationTOs = parser.parseJSONArray(response, MeteoStationTO.class);
+                for (MeteoStationTO meteoStationTO : meteoStationTOs) {
+                    FirebaseMessaging.getInstance().subscribeToTopic(meteoStationTO.getId().toString());
+                }
+                listAdapter.updateStationsList(meteoStationTOs);
             } catch (JSONException e) {
                 Log.e(TAG, "Failed to fetch the meteo stations list");
             }
