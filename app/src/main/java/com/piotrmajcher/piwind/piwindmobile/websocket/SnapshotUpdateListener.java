@@ -2,6 +2,7 @@ package com.piotrmajcher.piwind.piwindmobile.websocket;
 
 import android.util.Log;
 
+import com.piotrmajcher.piwind.piwindmobile.WEBSOCKET;
 import com.piotrmajcher.piwind.piwindmobile.updatehandlers.UpdateHandler;
 
 import java.util.UUID;
@@ -34,7 +35,7 @@ public class SnapshotUpdateListener extends AbstractUpdateListener<byte[]> {
 
     @Override
     public void onClosing(okhttp3.WebSocket webSocket, int code, String reason) {
-        webSocket.close(NORMAL_CLOSURE_STATUS, null);
+        webSocket.close(WEBSOCKET.NORMAL_CLOSURE_STATUS, null);
         Log.i(TAG, "Closing " + code + " " + reason);
     }
 

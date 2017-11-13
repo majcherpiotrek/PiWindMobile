@@ -8,12 +8,9 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoDataTO;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
 import com.piotrmajcher.piwind.piwindmobile.models.MeteoData;
-import com.piotrmajcher.piwind.piwindmobile.updatehandlers.UpdateHandler;
 import com.piotrmajcher.piwind.piwindmobile.websocket.MeteoDataUpdateListener;
 import com.piotrmajcher.piwind.piwindmobile.websocket.SnapshotUpdateListener;
 
@@ -22,13 +19,9 @@ import java.util.UUID;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.WebSocketListener;
-import okio.ByteString;
+import okhttp3.WebSocket;
 
 public class MeteoStationDetailsActivity extends AppCompatActivity {
-
-    // TODO Close the websocket connection when going back from this activity
 
     private static final String TAG = MeteoStationDetailsActivity.class.getName();
     private static final String UPDATE_METEO_URL = WEBSOCKET.BASE_URL + WEBSOCKET.METEO_UPDATE_ENDPOINT;
@@ -37,32 +30,31 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
     private TextView meteoDataTextView;
     private ImageView snapshotImageView;
     private MeteoData meteoData;
+    private SnapshotUpdateListener snapshotUpdateListener;
+    private MeteoDataUpdateListener meteoDataUpdateListener;
+    private WebSocket webSocketMeteo;
+    private WebSocket webSocketSnapshots;
+    private MeteoStationTO meteoStationTO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meteo_station_details);
-        meteoDataTextView = (TextView) findViewById(R.id.meteo_data_text_view);
-        snapshotImageView = (ImageView) findViewById(R.id.snapshot);
-        MeteoStationTO meteoStationTO = (MeteoStationTO) getIntent().getSerializableExtra(MainActivity.SELECTED_STATION);
+        initViews();
+        meteoStationTO = (MeteoStationTO) getIntent().getSerializableExtra(MainActivity.SELECTED_STATION);
+        initUpdateListeners();
+    }
 
-        OkHttpClient okHttpClient = new OkHttpClient();
+    @Override
+    protected void onStop() {
+        super.onStop();
+        closeWebSocketConnections(WEBSOCKET.ACTIVITY_STOPPED);
+    }
 
-        SnapshotUpdateListener snapshotUpdateListener = new SnapshotUpdateListener(
-                meteoStationTO.getId(),
-                this::updateSnapshot
-        );
-        MeteoDataUpdateListener meteoDataUpdateListener = new MeteoDataUpdateListener(
-                meteoStationTO.getId(),
-                this::updateMeteoDataText
-        );
-
-        Request requestSnapshotUpdates = new Request.Builder().url(UPDATE_SNAPSHOTS_URL).build();
-        Request requestMeteoDataUpdates = new Request.Builder().url(UPDATE_METEO_URL).build();
-
-        okhttp3.WebSocket webSocketMeteo = okHttpClient.newWebSocket(requestMeteoDataUpdates, meteoDataUpdateListener);
-        okhttp3.WebSocket webSocketSnapshots = okHttpClient.newWebSocket(requestSnapshotUpdates, snapshotUpdateListener);
-        okHttpClient.dispatcher().executorService().shutdown();
+    @Override
+    protected void onStart() {
+        super.onStart();
+        initWebsocketConnections();
     }
 
     private void updateSnapshot(byte[] snapshot) {
@@ -74,5 +66,38 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
     private void updateMeteoDataText(MeteoDataTO meteoDataTO) {
         meteoData = new MeteoData(meteoDataTO);
         runOnUiThread(() -> meteoDataTextView.setText(meteoData.toString()));
+    }
+
+    private void initUpdateListeners() {
+        snapshotUpdateListener = new SnapshotUpdateListener(
+               meteoStationTO.getId(),
+                this::updateSnapshot
+        );
+        meteoDataUpdateListener = new MeteoDataUpdateListener(
+                meteoStationTO.getId(),
+                this::updateMeteoDataText
+        );
+    }
+
+    private void initWebsocketConnections() {
+        OkHttpClient okHttpClient = new OkHttpClient();
+        Request requestSnapshotUpdates = new Request.Builder().url(UPDATE_SNAPSHOTS_URL).build();
+        Request requestMeteoDataUpdates = new Request.Builder().url(UPDATE_METEO_URL).build();
+
+        webSocketMeteo = okHttpClient.newWebSocket(requestMeteoDataUpdates, meteoDataUpdateListener);
+        webSocketSnapshots = okHttpClient.newWebSocket(requestSnapshotUpdates, snapshotUpdateListener);
+        okHttpClient.dispatcher().executorService().shutdown();
+        Log.i(TAG, "Websocket connections initialized!");
+    }
+
+    private void closeWebSocketConnections(String reason) {
+        webSocketMeteo.close(WEBSOCKET.NORMAL_CLOSURE_STATUS, reason);
+        webSocketSnapshots.close(WEBSOCKET.NORMAL_CLOSURE_STATUS, reason);
+        Log.i(TAG, "Websocket connections closed. Reason: " + reason);
+    }
+
+    private void initViews() {
+        meteoDataTextView = (TextView) findViewById(R.id.meteo_data_text_view);
+        snapshotImageView = (ImageView) findViewById(R.id.snapshot);
     }
 }

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.piotrmajcher.piwind.piwindmobile.WEBSOCKET;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoDataTO;
 import com.piotrmajcher.piwind.piwindmobile.updatehandlers.UpdateHandler;
 
@@ -33,7 +34,7 @@ public class MeteoDataUpdateListener extends AbstractUpdateListener<MeteoDataTO>
 
     @Override
     public void onClosing(okhttp3.WebSocket webSocket, int code, String reason) {
-        webSocket.close(NORMAL_CLOSURE_STATUS, null);
+        webSocket.close(WEBSOCKET.NORMAL_CLOSURE_STATUS, null);
         Log.i(TAG, "Closing " + code + " " + reason);
     }
 

@@ -22,7 +22,7 @@ public class MeteoStationRestServiceImpl implements MeteoStationRestService {
 
 
     public MeteoStationRestServiceImpl() {
-        this.requestQueue = MainActivity.getRequestQueue();
+        this.requestQueue = MainActivity.REQUEST_QUEUE;
     }
 
     @Override

@@ -22,44 +22,66 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getName();
-    private static Context applicationContext;
-    private static RequestQueue requestQueue;
+    public static final String SELECTED_STATION = "selected_station";
+    private static final String ID_KEY = "id";
+    private static final String NAME_KEY = "name";
+    private static final String URL_KEY = "stationBaseURL";
+    public static RequestQueue REQUEST_QUEUE;
     private ListView listView;
     private TextView textView;
-    public static final String SELECTED_STATION = "selected_station";
+    private StationsListAdapter listAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        textView = (TextView) findViewById(R.id.loading_stations);
-        if (getIntent().getExtras() != null) {
+        MainActivity.REQUEST_QUEUE = Volley.newRequestQueue(getApplicationContext());
+        initViews();
+        getStationsListFromServer();
+        handleIntent(getIntent());
+    }
 
-            final String intent = getIntent().getExtras().toString();
-            runOnUiThread(() -> textView.setText(intent));
+    public void goToMeteoStationDetails(MeteoStationTO meteoStationTO) {
+        Intent intent = new Intent(this, MeteoStationDetailsActivity.class);
+        intent.putExtra(SELECTED_STATION, meteoStationTO);
+        startActivity(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (intent != null && intent.getExtras() != null) {
+            Bundle extras = intent.getExtras();
+            if (extras.containsKey(ID_KEY) && extras.containsKey(NAME_KEY) && extras.containsKey(URL_KEY)) {
+                MeteoStationTO meteoStationTO = new MeteoStationTO();
+                meteoStationTO.setId(UUID.fromString(extras.getString(ID_KEY)));
+                meteoStationTO.setName(intent.getExtras().getString(NAME_KEY));
+                meteoStationTO.setStationBaseURL(intent.getExtras().getString(URL_KEY));
+                goToMeteoStationDetails(meteoStationTO);
+            }
         }
+    }
 
-        // Subscribe firebase topic
-
-        ////////////////////////////
-        MainActivity.applicationContext = getApplicationContext();
-        MainActivity.requestQueue = Volley.newRequestQueue(MainActivity.applicationContext);
+    public void initViews() {
+        textView = (TextView) findViewById(R.id.loading_stations);
+        listView = (ListView) findViewById(R.id.stations_list);
 
         List<MeteoStationTO> stationsList = new ArrayList<>();
-        final StationsListAdapter listAdapter = new StationsListAdapter(this, stationsList);
+        listAdapter = new StationsListAdapter(this, stationsList);
 
-        listView = (ListView) findViewById(R.id.stations_list);
         listView.setAdapter(listAdapter);
         listView.setOnItemClickListener((parent, view, position, id) -> {
             MeteoStationTO selectedStation = (MeteoStationTO) listAdapter.getItem(position);
             goToMeteoStationDetails(selectedStation);
         });
+    }
 
+    public void getStationsListFromServer() {
         MeteoStationRestService meteoStationRestService = new MeteoStationRestServiceImpl();
         meteoStationRestService.getMeteoStationsList(response -> {
             JsonToObjectParserImpl<MeteoStationTO> parser = new JsonToObjectParserImpl<>();
@@ -72,22 +94,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 Log.e(TAG, "Failed to fetch the meteo stations list");
             }
-        }, error -> {
-                Log.e(TAG, error.getMessage());
-        });
-    }
-
-    public void goToMeteoStationDetails(MeteoStationTO meteoStationTO) {
-        Intent intent = new Intent(this, MeteoStationDetailsActivity.class);
-        intent.putExtra(SELECTED_STATION, meteoStationTO);
-        startActivity(intent);
-    }
-
-    public static Context getAppContext() {
-        return MainActivity.applicationContext;
-    }
-
-    public static RequestQueue getRequestQueue() {
-        return MainActivity.requestQueue;
+        }, error -> Log.e(TAG, error.getMessage()));
     }
 }
