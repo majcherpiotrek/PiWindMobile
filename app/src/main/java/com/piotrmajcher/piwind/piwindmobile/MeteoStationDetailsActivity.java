@@ -40,8 +40,12 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meteo_station_details);
+
         initViews();
         meteoStationTO = (MeteoStationTO) getIntent().getSerializableExtra(MainActivity.SELECTED_STATION);
+        if (super.getSupportActionBar() != null) {
+            super.getSupportActionBar().setTitle(meteoStationTO.getName());
+        }
         initUpdateListeners();
     }
 
