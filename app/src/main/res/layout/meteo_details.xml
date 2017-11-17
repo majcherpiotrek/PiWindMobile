@@ -7,7 +7,7 @@
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
     android:paddingTop="10dp"
-    tools:context="com.piotrmajcher.piwind.piwindmobile.MeteoStationDetailsActivity">
+    tools:context="com.piotrmajcher.piwind.piwindmobile.StationViewActivity">
 
     <ImageView
         android:id="@+id/snapshot"
@@ -34,7 +34,7 @@
             android:layout_gravity="bottom"
             android:layout_marginRight="5dp"
             android:layout_marginEnd="5dp"
-            android:src="@drawable/ic_wind"/>
+            android:src="@drawable/ic_windsleeve"/>
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -45,7 +45,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:maxLines="1"
-                android:textSize="20sp"
+                android:textSize="@dimen/meteo_details_view_property_title_font_size"
                 android:textStyle="bold"
                 android:layout_gravity="center_horizontal"
                 />
@@ -83,7 +83,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="left"
                     android:maxLines="1"
-                    android:textSize="20sp"
+                    android:textSize="@dimen/meteo_details_view_property_title_font_size"
                     android:textStyle="bold"
                     />
                 <TextView
@@ -125,7 +125,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
                 android:maxLines="1"
-                android:textSize="20sp"
+                android:textSize="@dimen/meteo_details_view_property_title_font_size"
                 android:textStyle="bold"
                 />
             <TextView
@@ -165,7 +165,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
                 android:maxLines="1"
-                android:textSize="20sp"
+                android:textSize="@dimen/meteo_details_view_property_title_font_size"
                 android:textStyle="bold"
                 android:text="@string/water_conditions"
                 />
@@ -206,7 +206,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
                 android:maxLines="1"
-                android:textSize="20sp"
+                android:textSize="@dimen/meteo_details_view_property_title_font_size"
                 android:textStyle="bold"
                 android:text="@string/suggested_equipment"
                 />

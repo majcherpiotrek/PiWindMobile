@@ -23,8 +23,7 @@
             android:name=".StationViewActivity"
             android:label="@string/title_activity_station_view"
             android:theme="@style/AppTheme"
-            android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />

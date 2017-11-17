@@ -1,5 +1,6 @@
 package com.piotrmajcher.piwind.piwindmobile.tabfragments;
 
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -68,15 +69,22 @@ public class MeteoDetailsFragment extends Fragment {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        closeWebSocketConnections(WEBSOCKET.ACTIVITY_STOPPED);
-    }
-
-    @Override
     public void onStart() {
         super.onStart();
         initWebsocketConnections();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+        closeWebSocketConnections(WEBSOCKET.FRAGMENT_PAUSED);
     }
 
     @Nullable
