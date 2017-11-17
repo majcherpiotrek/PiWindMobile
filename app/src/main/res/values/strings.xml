@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">PiWindMobile</string>
     <string name="loading_meteo_stations">Loading meteo stations ...</string>
+    <string name="water_conditions"><![CDATA[Water conditions]]></string>
+    <string name="suggested_equipment">Suggested equipment</string>
 </resources>

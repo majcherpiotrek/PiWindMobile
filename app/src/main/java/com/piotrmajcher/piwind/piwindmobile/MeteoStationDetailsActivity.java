@@ -15,19 +15,23 @@ import com.piotrmajcher.piwind.piwindmobile.websocket.MeteoDataUpdateListener;
 import com.piotrmajcher.piwind.piwindmobile.websocket.SnapshotUpdateListener;
 
 
-import java.util.UUID;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.WebSocket;
+import java.text.DecimalFormat;
 
 public class MeteoStationDetailsActivity extends AppCompatActivity {
 
     private static final String TAG = MeteoStationDetailsActivity.class.getName();
     private static final String UPDATE_METEO_URL = WEBSOCKET.BASE_URL + WEBSOCKET.METEO_UPDATE_ENDPOINT;
     private static final String UPDATE_SNAPSHOTS_URL = WEBSOCKET.BASE_URL + WEBSOCKET.SNAPSHOTS_UPDATE_ENDPOINT;
-
-    private TextView meteoDataTextView;
+    private static DecimalFormat df = new DecimalFormat("0.0");
+    private TextView windSpeedTextView;
+    private TextView windBftTextView;
+    private TextView windDirectionTextView;
+    private TextView windDirectionDescTextView;
+    private TextView temperatureDataTextView;
+    private TextView temperatureDataDescTextView;
     private ImageView snapshotImageView;
     private MeteoData meteoData;
     private SnapshotUpdateListener snapshotUpdateListener;
@@ -69,7 +73,23 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
     }
     private void updateMeteoDataText(MeteoDataTO meteoDataTO) {
         meteoData = new MeteoData(meteoDataTO);
-        runOnUiThread(() -> meteoDataTextView.setText(meteoData.toString()));
+        final String windSpeed = df.format(meteoData.getWindSpeed()) + " mps";
+        String[] split = meteoData.getWindDirectionDescription().split("-", 2);
+        final String windDir = split[0].trim();
+        split[1] = split[1].trim();
+        split[1] = split[1].substring(0,1).toUpperCase() + split[1].substring(1);
+        final String windDirDesc = split[1];
+        final String windBft = meteoData.getBeaufortCategoryDescription();
+        final String temperatureData = df.format(meteoData.getTemperature()) + "\u2103";
+        final String temperatureDataDesc = meteoData.getTemperatureConditionsDescription();
+        runOnUiThread(() -> {
+            windSpeedTextView.setText(windSpeed);
+            windDirectionTextView.setText(windDir);
+            windDirectionDescTextView.setText(windDirDesc);
+            windBftTextView.setText(windBft);
+            temperatureDataTextView.setText(temperatureData);
+            temperatureDataDescTextView.setText(temperatureDataDesc);
+        });
     }
 
     private void initUpdateListeners() {
@@ -101,7 +121,12 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        meteoDataTextView = (TextView) findViewById(R.id.meteo_data_text_view);
+        windSpeedTextView = (TextView) findViewById(R.id.wind_speed);
+        windBftTextView = (TextView) findViewById(R.id.wind_bft);
+        windDirectionTextView = (TextView) findViewById(R.id.wind_dir);
+        windDirectionDescTextView = (TextView) findViewById(R.id.wind_dir_desc);
         snapshotImageView = (ImageView) findViewById(R.id.snapshot);
+        temperatureDataTextView = (TextView) findViewById(R.id.therm_data);
+        temperatureDataDescTextView = (TextView) findViewById(R.id.therm_desc);
     }
 }
