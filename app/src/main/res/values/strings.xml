@@ -3,4 +3,7 @@
     <string name="loading_meteo_stations">Loading meteo stations ...</string>
     <string name="water_conditions"><![CDATA[Water conditions]]></string>
     <string name="suggested_equipment">Suggested equipment</string>
+    <string name="title_activity_station_view">StationViewActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>

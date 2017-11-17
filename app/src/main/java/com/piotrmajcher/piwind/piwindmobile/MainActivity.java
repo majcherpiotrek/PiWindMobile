@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void goToMeteoStationDetails(MeteoStationTO meteoStationTO) {
-        Intent intent = new Intent(this, MeteoStationDetailsActivity.class);
+        Intent intent = new Intent(this, StationViewActivity.class);
         intent.putExtra(SELECTED_STATION, meteoStationTO);
         startActivity(intent);
     }
@@ -92,8 +92,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 listAdapter.updateStationsList(meteoStationTOs);
             } catch (JSONException e) {
-                Log.e(TAG, "Failed to fetch the meteo stations list");
+                Log.e(TAG, "Failed to parse the meteo stations list");
             }
-        }, error -> Log.e(TAG, error.getMessage()));
+        }, error -> Log.e(TAG, "Failed to fetch the meteo stations list"));
     }
 }

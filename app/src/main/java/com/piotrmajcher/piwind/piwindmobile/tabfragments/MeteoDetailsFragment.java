@@ -1,28 +1,33 @@
-package com.piotrmajcher.piwind.piwindmobile;
+package com.piotrmajcher.piwind.piwindmobile.tabfragments;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.piotrmajcher.piwind.piwindmobile.R;
+import com.piotrmajcher.piwind.piwindmobile.WEBSOCKET;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoDataTO;
-import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
 import com.piotrmajcher.piwind.piwindmobile.models.MeteoData;
 import com.piotrmajcher.piwind.piwindmobile.websocket.MeteoDataUpdateListener;
 import com.piotrmajcher.piwind.piwindmobile.websocket.SnapshotUpdateListener;
 
+import java.text.DecimalFormat;
+import java.util.UUID;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.WebSocket;
-import java.text.DecimalFormat;
 
-public class MeteoStationDetailsActivity extends AppCompatActivity {
-
-    private static final String TAG = MeteoStationDetailsActivity.class.getName();
+public class MeteoDetailsFragment extends Fragment {
+    private static final String TAG = MeteoDetailsFragment.class.getName();
     private static final String UPDATE_METEO_URL = WEBSOCKET.BASE_URL + WEBSOCKET.METEO_UPDATE_ENDPOINT;
     private static final String UPDATE_SNAPSHOTS_URL = WEBSOCKET.BASE_URL + WEBSOCKET.SNAPSHOTS_UPDATE_ENDPOINT;
     private static DecimalFormat df = new DecimalFormat("0.0");
@@ -38,36 +43,55 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
     private MeteoDataUpdateListener meteoDataUpdateListener;
     private WebSocket webSocketMeteo;
     private WebSocket webSocketSnapshots;
-    private MeteoStationTO meteoStationTO;
+    private String meteoStationId;
+    private View view;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_meteo_station_details);
-
-        initViews();
-        meteoStationTO = (MeteoStationTO) getIntent().getSerializableExtra(MainActivity.SELECTED_STATION);
-        if (super.getSupportActionBar() != null) {
-            super.getSupportActionBar().setTitle(meteoStationTO.getName());
-        }
-        initUpdateListeners();
+    public static MeteoDetailsFragment newInstance(String meteoStationId) {
+        MeteoDetailsFragment f = new MeteoDetailsFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("meteoStationId", meteoStationId);
+        f.setArguments(args);
+        return f;
     }
 
     @Override
-    protected void onStop() {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Bundle args = getArguments();
+        if (args != null  && args.getSerializable("meteoStationId") != null) {
+            meteoStationId = args.getString("meteoStationId");
+
+        } else {
+            throw new RuntimeException("Unexpected state occured. Null station object passed to station details view.");
+        }
+    }
+
+    @Override
+    public void onStop() {
         super.onStop();
         closeWebSocketConnections(WEBSOCKET.ACTIVITY_STOPPED);
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         initWebsocketConnections();
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.meteo_details, container, false);
+        initViews();
+        initUpdateListeners();
+        return view;
+    }
+
     private void updateSnapshot(byte[] snapshot) {
-        runOnUiThread(() -> {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(snapshot, 0, snapshot.length);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(snapshot, 0, snapshot.length);
+
+        getActivity().runOnUiThread(() -> {
             snapshotImageView.setImageBitmap(bitmap);
         });
     }
@@ -82,7 +106,8 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
         final String windBft = meteoData.getBeaufortCategoryDescription();
         final String temperatureData = df.format(meteoData.getTemperature()) + "\u2103";
         final String temperatureDataDesc = meteoData.getTemperatureConditionsDescription();
-        runOnUiThread(() -> {
+
+        getActivity().runOnUiThread(() -> {
             windSpeedTextView.setText(windSpeed);
             windDirectionTextView.setText(windDir);
             windDirectionDescTextView.setText(windDirDesc);
@@ -94,11 +119,11 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
 
     private void initUpdateListeners() {
         snapshotUpdateListener = new SnapshotUpdateListener(
-               meteoStationTO.getId(),
+                UUID.fromString(meteoStationId.trim()),
                 this::updateSnapshot
         );
         meteoDataUpdateListener = new MeteoDataUpdateListener(
-                meteoStationTO.getId(),
+                UUID.fromString(meteoStationId.trim()),
                 this::updateMeteoDataText
         );
     }
@@ -121,12 +146,14 @@ public class MeteoStationDetailsActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        windSpeedTextView = (TextView) findViewById(R.id.wind_speed);
-        windBftTextView = (TextView) findViewById(R.id.wind_bft);
-        windDirectionTextView = (TextView) findViewById(R.id.wind_dir);
-        windDirectionDescTextView = (TextView) findViewById(R.id.wind_dir_desc);
-        snapshotImageView = (ImageView) findViewById(R.id.snapshot);
-        temperatureDataTextView = (TextView) findViewById(R.id.therm_data);
-        temperatureDataDescTextView = (TextView) findViewById(R.id.therm_desc);
+        windSpeedTextView = (TextView) view.findViewById(R.id.wind_speed);
+        windBftTextView = (TextView) view.findViewById(R.id.wind_bft);
+        windDirectionTextView = (TextView) view.findViewById(R.id.wind_dir);
+        windDirectionDescTextView = (TextView) view.findViewById(R.id.wind_dir_desc);
+        snapshotImageView = (ImageView) view.findViewById(R.id.snapshot);
+        temperatureDataTextView = (TextView) view.findViewById(R.id.therm_data);
+        temperatureDataDescTextView = (TextView) view.findViewById(R.id.therm_desc);
     }
+
+
 }
