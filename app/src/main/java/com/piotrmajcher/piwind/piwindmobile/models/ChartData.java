@@ -1,36 +1,48 @@
 package com.piotrmajcher.piwind.piwindmobile.models;
 
+import com.piotrmajcher.piwind.piwindmobile.dto.ChartDataTO;
+
 import java.io.Serializable;
 import java.util.Date;
 
 public class ChartData implements Serializable{
 
-    private float avgWind;
-    private float maxGust;
-    private float minGust;
+    private Float avgWind;
+    private Float maxGust;
+    private Float minGust;
     private Date date;
 
-    public float getAvgWind() {
+    public ChartData() {
+        super();
+    }
+
+    public ChartData(ChartDataTO to) {
+        this.avgWind = to.getAvgWind();
+        this.maxGust = to.getMaxGust();
+        this.minGust = to.getMinGust();
+        this.date = new Date(to.getDate());
+    }
+    public Float getAvgWind() {
         return avgWind;
     }
 
-    public void setAvgWind(float avgWind) {
+    public void setAvgWind(Float avgWind) {
         this.avgWind = avgWind;
     }
 
-    public float getMaxGust() {
+    public Float getMaxGust() {
         return maxGust;
     }
 
-    public void setMaxGust(float maxGust) {
+    public void setMaxGust(Float maxGust) {
         this.maxGust = maxGust;
     }
 
-    public float getMinGust() {
+    public Float getMinGust() {
         return minGust;
     }
 
-    public void setMinGust(float minGust) {
+    public void setMinGust(Float minGust) {
         this.minGust = minGust;
     }
 

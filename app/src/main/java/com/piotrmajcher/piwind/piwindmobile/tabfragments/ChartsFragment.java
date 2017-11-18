@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +13,23 @@ import android.view.ViewGroup;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.piotrmajcher.piwind.piwindmobile.R;
+import com.piotrmajcher.piwind.piwindmobile.dto.ChartDataTO;
 import com.piotrmajcher.piwind.piwindmobile.models.ChartData;
+import com.piotrmajcher.piwind.piwindmobile.rest.MeteoStationRestService;
+import com.piotrmajcher.piwind.piwindmobile.rest.impl.MeteoStationRestServiceImpl;
 import com.piotrmajcher.piwind.piwindmobile.tabfragments.chartutils.DateTimeXAxisValueFormatter;
+import com.piotrmajcher.piwind.piwindmobile.util.JsonToObjectsParser;
+import com.piotrmajcher.piwind.piwindmobile.util.impl.JsonToObjectParserImpl;
 
+import org.json.JSONException;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -29,8 +39,11 @@ import java.util.UUID;
 
 public class ChartsFragment extends Fragment {
     private static final String TAG = ChartsFragment.class.getName();
+    private static final int samples = 20;
+    private static final int intervalMinutes = 5; // TODO 15 normally
     private UUID stationId;
     private LineChart chart;
+    private List<ChartData> windChartData;
 
     public static ChartsFragment newInstance(String meteoStationId) {
         ChartsFragment f = new ChartsFragment();
@@ -51,6 +64,7 @@ public class ChartsFragment extends Fragment {
         } else {
             throw new RuntimeException("Unexpected state occured. Null station object passed to station details view.");
         }
+        windChartData = new ArrayList<>();
     }
 
     @Nullable
@@ -61,12 +75,38 @@ public class ChartsFragment extends Fragment {
         chart = (LineChart) view.findViewById(R.id.chart);
         SwipeRefreshLayout refresher = (SwipeRefreshLayout) view.findViewById(R.id.charts_refresher);
         refresher.setOnRefreshListener(() -> {
-            refreshChart(chart);
-            refresher.setRefreshing(false);
+            getChartDataFromServer(chart, refresher);
         });
 
-        refreshChart(chart);
+        getChartDataFromServer(chart, refresher);
+
         return view;
+    }
+
+    private void getChartDataFromServer(LineChart chart, SwipeRefreshLayout refresher) {
+        MeteoStationRestService meteoStationRestService = new MeteoStationRestServiceImpl();
+        meteoStationRestService.getChartData(stationId, samples, intervalMinutes,
+                response -> {
+                    try {
+                        JsonToObjectsParser parser = new JsonToObjectParserImpl();
+                        List<ChartDataTO> tos = parser.parseJSONArray(response, ChartDataTO.class);
+                        List<ChartData> result = new LinkedList<>();
+                        for (ChartDataTO to : tos) {
+                            result.add(new ChartData(to));
+                        }
+                        windChartData = result;
+                        LineData lineData = createWindChartLineData(windChartData);
+                        setupAxis(chart, windChartData);
+                        setupChart(chart, lineData);
+                        refresher.setRefreshing(false);
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Failed to parse the chart data response");
+                        refresher.setRefreshing(false);
+                    }
+                }, error -> {
+                    Log.e(TAG, "Failed to fetch the chart data from server!");
+                    refresher.setRefreshing(false);
+                });
     }
 
     @NonNull
@@ -112,12 +152,18 @@ public class ChartsFragment extends Fragment {
         dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         dataSet.setLineWidth(lineWidth);
     }
-    private void setupXAxis(LineChart chart, List<ChartData> windChartData) {
+    private void setupAxis(LineChart chart, List<ChartData> windChartData) {
         XAxis xAxis = chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.addLimitLine(new LimitLine(30, "Next day"));
         xAxis.setDrawGridLines(false);
         xAxis.setValueFormatter(new DateTimeXAxisValueFormatter(createDatesXAxisLabels(windChartData)));
+
+        YAxis left = chart.getAxisLeft();
+        left.setStartAtZero(true);
+        YAxis right = chart.getAxisRight();
+        right.setStartAtZero(true);
+
     }
 
     private Date[] createDatesXAxisLabels(List<ChartData> data) {
@@ -128,12 +174,6 @@ public class ChartsFragment extends Fragment {
         return result;
     }
 
-    private void refreshChart(LineChart chart) {
-        List<ChartData> windChartData = generateRandomData(20, 5);
-        LineData lineData = createWindChartLineData(windChartData);
-        setupXAxis(chart, windChartData);
-        setupChart(chart, lineData);
-    }
     private List<ChartData> generateRandomData(int dataSize, long measurementsInterval) {
         Date startDate = new Date();
         Random random = new Random();
