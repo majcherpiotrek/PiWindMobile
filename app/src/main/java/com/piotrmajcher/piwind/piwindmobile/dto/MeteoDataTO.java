@@ -8,7 +8,7 @@ public class MeteoDataTO {
 
     private double windSpeed;
 
-    private long dateTime;
+    private Date dateTime;
 
     private String windDirectionDescription;
 
@@ -32,11 +32,11 @@ public class MeteoDataTO {
         this.windSpeed = windSpeed;
     }
 
-    public long getDateTime() {
+    public Date getDateTime() {
         return dateTime;
     }
 
-    public void setDateTime(long dateTime) {
+    public void setDateTime(Date dateTime) {
         this.dateTime = dateTime;
     }
 

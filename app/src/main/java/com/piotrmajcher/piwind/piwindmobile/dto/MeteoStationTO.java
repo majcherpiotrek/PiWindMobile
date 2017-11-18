@@ -11,7 +11,6 @@ public class MeteoStationTO implements Serializable{
 
     private String stationBaseURL;
 
-
     public UUID getId() {
         return id;
     }
