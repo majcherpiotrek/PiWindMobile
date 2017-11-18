@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +40,6 @@ public class MeteoDetailsFragment extends Fragment {
     private TextView temperatureDataTextView;
     private TextView temperatureDataDescTextView;
     private ImageView snapshotImageView;
-    private MeteoData meteoData;
     private SnapshotUpdateListener snapshotUpdateListener;
     private MeteoDataUpdateListener meteoDataUpdateListener;
     private WebSocket webSocketMeteo;
@@ -60,7 +60,7 @@ public class MeteoDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         Bundle args = getArguments();
-        if (args != null  && args.getSerializable("meteoStationId") != null) {
+        if (args != null  && args.getString("meteoStationId") != null) {
             meteoStationId = args.getString("meteoStationId");
 
         } else {
@@ -75,15 +75,8 @@ public class MeteoDetailsFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
-        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
         closeWebSocketConnections(WEBSOCKET.FRAGMENT_PAUSED);
     }
 
@@ -93,9 +86,18 @@ public class MeteoDetailsFragment extends Fragment {
         view = inflater.inflate(R.layout.meteo_details, container, false);
         initViews();
         initUpdateListeners();
+        SwipeRefreshLayout refresher = (SwipeRefreshLayout) view.findViewById(R.id.meteo_refresher);
+        refresher.setOnRefreshListener(() -> {
+            refreshConnection();
+            refresher.setRefreshing(false);
+        });
         return view;
     }
 
+    private void refreshConnection() {
+        closeWebSocketConnections(WEBSOCKET.REFRESH);
+        initWebsocketConnections();
+    }
     private void updateSnapshot(byte[] snapshot) {
         Bitmap bitmap = BitmapFactory.decodeByteArray(snapshot, 0, snapshot.length);
 
@@ -104,7 +106,7 @@ public class MeteoDetailsFragment extends Fragment {
         });
     }
     private void updateMeteoDataText(MeteoDataTO meteoDataTO) {
-        meteoData = new MeteoData(meteoDataTO);
+        MeteoData meteoData = new MeteoData(meteoDataTO);
         final String windSpeed = df.format(meteoData.getWindSpeed()) + " mps";
         String[] split = meteoData.getWindDirectionDescription().split("-", 2);
         final String windDir = split[0].trim();

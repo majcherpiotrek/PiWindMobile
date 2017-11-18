@@ -3,6 +3,7 @@ package com.piotrmajcher.piwind.piwindmobile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.ListView;
@@ -78,6 +79,12 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener((parent, view, position, id) -> {
             MeteoStationTO selectedStation = (MeteoStationTO) listAdapter.getItem(position);
             goToMeteoStationDetails(selectedStation);
+        });
+
+        SwipeRefreshLayout refresher = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        refresher.setOnRefreshListener(() -> {
+            getStationsListFromServer();
+            refresher.setRefreshing(false);
         });
     }
 
