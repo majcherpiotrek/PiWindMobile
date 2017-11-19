@@ -1,4 +1,4 @@
-package com.piotrmajcher.piwind.piwindmobile.rest.impl;
+package com.piotrmajcher.piwind.piwindmobile.services.impl;
 
 import android.util.Log;
 
@@ -6,9 +6,8 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.piotrmajcher.piwind.piwindmobile.MainActivity;
 import com.piotrmajcher.piwind.piwindmobile.REST;
-import com.piotrmajcher.piwind.piwindmobile.rest.MeteoStationRestService;
+import com.piotrmajcher.piwind.piwindmobile.services.MeteoStationService;
 
 import junit.framework.Assert;
 
@@ -16,16 +15,16 @@ import org.json.JSONArray;
 
 import java.util.UUID;
 
-public class MeteoStationRestServiceImpl implements MeteoStationRestService {
+public class MeteoStationServiceImpl implements MeteoStationService {
 
-    private static final String TAG = MeteoStationRestServiceImpl.class.getName();
+    private static final String TAG = MeteoStationServiceImpl.class.getName();
     private static final String GET_STATIONS_LIST_URL = REST.BASE_URL + REST.GET_STATIONS_LIST_ENDPOINT;
     private static final String GET_CHART_DATA_BASE_URL = REST.BASE_URL + REST.STATISTIC_ENDPOINT;
     private RequestQueue requestQueue;
 
 
-    public MeteoStationRestServiceImpl() {
-        this.requestQueue = MainActivity.REQUEST_QUEUE;
+    public MeteoStationServiceImpl(RequestQueue requestQueue) {
+        this.requestQueue = requestQueue;
     }
 
     @Override
@@ -34,7 +33,6 @@ public class MeteoStationRestServiceImpl implements MeteoStationRestService {
             Response.ErrorListener errorListener) {
         Assert.assertNotNull(responseListener);
         Assert.assertNotNull(errorListener);
-
 
         JsonArrayRequest stationsRequest = new JsonArrayRequest(
                 Request.Method.GET, GET_STATIONS_LIST_URL, (String) null, responseListener, errorListener);

@@ -6,22 +6,15 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 
-import com.github.mikephil.charting.charts.LineChart;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
 import com.piotrmajcher.piwind.piwindmobile.adapters.SectionsPageAdapter;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
-import com.piotrmajcher.piwind.piwindmobile.models.ChartData;
 import com.piotrmajcher.piwind.piwindmobile.tabfragments.ChartsFragment;
 import com.piotrmajcher.piwind.piwindmobile.tabfragments.MeteoDetailsFragment;
-
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
 
 public class StationViewActivity extends AppCompatActivity {
 
@@ -38,7 +31,7 @@ public class StationViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_station_view);
         Log.d(TAG, "onCreate: Starting...");
 
-        meteoStationTO = (MeteoStationTO) getIntent().getSerializableExtra(MainActivity.SELECTED_STATION);
+        meteoStationTO = (MeteoStationTO) getIntent().getSerializableExtra(StationsListActivity.SELECTED_STATION);
         if (super.getSupportActionBar() != null) {
             super.getSupportActionBar().setTitle(meteoStationTO.getName());
         }
@@ -80,6 +73,7 @@ public class StationViewActivity extends AppCompatActivity {
 
     private void setupSectionsPageAdapter(SectionsPageAdapter adapter) {
         adapter.addFragment(MeteoDetailsFragment.newInstance(meteoStationTO.getId().toString()), "Meteo");
-        adapter.addFragment(ChartsFragment.newInstance(meteoStationTO.getId().toString()), "Charts");
+        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        adapter.addFragment(ChartsFragment.newInstance(meteoStationTO.getId().toString(), requestQueue), "Charts");
     }
 }

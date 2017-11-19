@@ -1,7 +1,7 @@
 package com.piotrmajcher.piwind.piwindmobile;
 
-import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -14,8 +14,8 @@ import com.android.volley.toolbox.Volley;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.piotrmajcher.piwind.piwindmobile.adapters.StationsListAdapter;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
-import com.piotrmajcher.piwind.piwindmobile.rest.MeteoStationRestService;
-import com.piotrmajcher.piwind.piwindmobile.rest.impl.MeteoStationRestServiceImpl;
+import com.piotrmajcher.piwind.piwindmobile.services.MeteoStationService;
+import com.piotrmajcher.piwind.piwindmobile.services.impl.MeteoStationServiceImpl;
 import com.piotrmajcher.piwind.piwindmobile.util.impl.JsonToObjectParserImpl;
 
 
@@ -26,27 +26,57 @@ import java.util.List;
 import java.util.UUID;
 
 
-public class MainActivity extends AppCompatActivity {
+public class StationsListActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getName();
+    private static final String TAG = StationsListActivity.class.getName();
     public static final String SELECTED_STATION = "selected_station";
-    private static final String ID_KEY = "id";
-    private static final String NAME_KEY = "name";
-    private static final String URL_KEY = "stationBaseURL";
-    public static RequestQueue REQUEST_QUEUE;
+
     private ListView listView;
     private TextView textView;
     private StationsListAdapter listAdapter;
+    private MeteoStationService meteoStationService;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        MainActivity.REQUEST_QUEUE = Volley.newRequestQueue(getApplicationContext());
-        initViews();
-        getStationsListFromServer();
-        handleIntent(getIntent());
+        setContentView(R.layout.stations_list);
+
+        Intent intent = getIntent();
+        if (!isUserAuthorized()) {
+            redirectToLoginActivity(intent);
+        } else {
+            RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+            meteoStationService = new MeteoStationServiceImpl(requestQueue);
+            initViews();
+            getStationsListFromServer();
+            handleIntent(intent);
+        }
+    }
+
+    private void redirectToLoginActivity(Intent intent) {
+        Intent loginActivityIntent = new Intent(this, LoginActivity.class);
+        if (intent != null) {
+            addExtrasToIntent(intent.getExtras(), loginActivityIntent);
+            startActivity(loginActivityIntent);
+            this.finish();
+        }
+    }
+
+    private void addExtrasToIntent(Bundle extras, Intent intent) {
+        if (extras != null &&
+                extras.containsKey(CONFIG.ID_KEY) &&
+                extras.containsKey(CONFIG.NAME_KEY) &&
+                extras.containsKey(CONFIG.URL_KEY)) {
+            intent.putExtra(CONFIG.ID_KEY, extras.getString(CONFIG.ID_KEY));
+            intent.putExtra(CONFIG.NAME_KEY, extras.getString(CONFIG.NAME_KEY));
+            intent.putExtra(CONFIG.URL_KEY, extras.getString(CONFIG.URL_KEY));
+        }
+    }
+
+    private boolean isUserAuthorized() {
+        SharedPreferences sharedPreferences = getSharedPreferences(CONFIG.LOGIN_PREFERENCES_KEY, MODE_PRIVATE);
+        return sharedPreferences.getBoolean(CONFIG.IS_USER_AUTHORIZED_KEY, false);
     }
 
     public void goToMeteoStationDetails(MeteoStationTO meteoStationTO) {
@@ -58,11 +88,11 @@ public class MainActivity extends AppCompatActivity {
     private void handleIntent(Intent intent) {
         if (intent != null && intent.getExtras() != null) {
             Bundle extras = intent.getExtras();
-            if (extras.containsKey(ID_KEY) && extras.containsKey(NAME_KEY) && extras.containsKey(URL_KEY)) {
+            if (extras.containsKey(CONFIG.ID_KEY) && extras.containsKey(CONFIG.NAME_KEY) && extras.containsKey(CONFIG.URL_KEY)) {
                 MeteoStationTO meteoStationTO = new MeteoStationTO();
-                meteoStationTO.setId(UUID.fromString(extras.getString(ID_KEY)));
-                meteoStationTO.setName(intent.getExtras().getString(NAME_KEY));
-                meteoStationTO.setStationBaseURL(intent.getExtras().getString(URL_KEY));
+                meteoStationTO.setId(UUID.fromString(extras.getString(CONFIG.ID_KEY)));
+                meteoStationTO.setName(intent.getExtras().getString(CONFIG.NAME_KEY));
+                meteoStationTO.setStationBaseURL(intent.getExtras().getString(CONFIG.URL_KEY));
                 goToMeteoStationDetails(meteoStationTO);
             }
         }
@@ -89,8 +119,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getStationsListFromServer() {
-        MeteoStationRestService meteoStationRestService = new MeteoStationRestServiceImpl();
-        meteoStationRestService.getMeteoStationsList(response -> {
+        meteoStationService.getMeteoStationsList(response -> {
             JsonToObjectParserImpl<MeteoStationTO> parser = new JsonToObjectParserImpl<>();
             try {
                 List<MeteoStationTO> meteoStationTOs = parser.parseJSONArray(response, MeteoStationTO.class);

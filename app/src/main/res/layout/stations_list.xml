@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context="com.piotrmajcher.piwind.piwindmobile.MainActivity">
+    tools:context="com.piotrmajcher.piwind.piwindmobile.StationsListActivity">
 
     <android.support.v4.widget.SwipeRefreshLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
