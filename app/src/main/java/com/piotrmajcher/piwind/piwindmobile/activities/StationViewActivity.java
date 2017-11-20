@@ -1,5 +1,6 @@
-package com.piotrmajcher.piwind.piwindmobile;
+package com.piotrmajcher.piwind.piwindmobile.activities;
 
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -11,7 +12,10 @@ import android.view.View;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.piotrmajcher.piwind.piwindmobile.ApplicationController;
+import com.piotrmajcher.piwind.piwindmobile.R;
 import com.piotrmajcher.piwind.piwindmobile.adapters.SectionsPageAdapter;
+import com.piotrmajcher.piwind.piwindmobile.config.CONFIG;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
 import com.piotrmajcher.piwind.piwindmobile.tabfragments.ChartsFragment;
 import com.piotrmajcher.piwind.piwindmobile.tabfragments.MeteoDetailsFragment;
@@ -24,6 +28,7 @@ public class StationViewActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private MeteoStationTO meteoStationTO;
     private TabLayout tabLayout;
+    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +36,7 @@ public class StationViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_station_view);
         Log.d(TAG, "onCreate: Starting...");
 
+        token = ApplicationController.getInstance(getApplicationContext()).getToken();
         meteoStationTO = (MeteoStationTO) getIntent().getSerializableExtra(StationsListActivity.SELECTED_STATION);
         if (super.getSupportActionBar() != null) {
             super.getSupportActionBar().setTitle(meteoStationTO.getName());
@@ -73,7 +79,7 @@ public class StationViewActivity extends AppCompatActivity {
 
     private void setupSectionsPageAdapter(SectionsPageAdapter adapter) {
         adapter.addFragment(MeteoDetailsFragment.newInstance(meteoStationTO.getId().toString()), "Meteo");
-        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        adapter.addFragment(ChartsFragment.newInstance(meteoStationTO.getId().toString(), requestQueue), "Charts");
+        RequestQueue requestQueue = ApplicationController.getInstance(getApplicationContext()).getRequestQueue();
+        adapter.addFragment(ChartsFragment.newInstance(meteoStationTO.getId().toString(), token, requestQueue), "Charts");
     }
 }

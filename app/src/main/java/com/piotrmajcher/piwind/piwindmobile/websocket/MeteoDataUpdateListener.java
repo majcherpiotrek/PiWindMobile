@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.piotrmajcher.piwind.piwindmobile.WEBSOCKET;
+import com.piotrmajcher.piwind.piwindmobile.config.WEBSOCKET;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoDataTO;
 import com.piotrmajcher.piwind.piwindmobile.updatehandlers.UpdateHandler;
 

@@ -2,7 +2,7 @@ package com.piotrmajcher.piwind.piwindmobile.websocket;
 
 import android.util.Log;
 
-import com.piotrmajcher.piwind.piwindmobile.WEBSOCKET;
+import com.piotrmajcher.piwind.piwindmobile.config.WEBSOCKET;
 import com.piotrmajcher.piwind.piwindmobile.updatehandlers.UpdateHandler;
 
 import java.util.UUID;

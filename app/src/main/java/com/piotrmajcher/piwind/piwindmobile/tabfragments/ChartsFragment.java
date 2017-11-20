@@ -19,6 +19,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.piotrmajcher.piwind.piwindmobile.R;
+import com.piotrmajcher.piwind.piwindmobile.config.CONFIG;
 import com.piotrmajcher.piwind.piwindmobile.dto.ChartDataTO;
 import com.piotrmajcher.piwind.piwindmobile.models.ChartData;
 import com.piotrmajcher.piwind.piwindmobile.services.MeteoStationService;
@@ -45,11 +46,13 @@ public class ChartsFragment extends Fragment {
     private LineChart chart;
     private List<ChartData> windChartData;
     private RequestQueue requestQueue;
+    private String token;
 
-    public static ChartsFragment newInstance(String meteoStationId, RequestQueue requestQueue) {
+    public static ChartsFragment newInstance(String meteoStationId, String token, RequestQueue requestQueue) {
         ChartsFragment f = new ChartsFragment();
         Bundle args = new Bundle();
         args.putSerializable("meteoStationId", meteoStationId);
+        args.putSerializable(CONFIG.TOKEN, token);
         f.setArguments(args);
         f.requestQueue = requestQueue;
         return f;
@@ -62,6 +65,7 @@ public class ChartsFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null  && args.getString("meteoStationId") != null) {
             stationId = UUID.fromString(args.getString("meteoStationId").trim());
+            token = args.getString(CONFIG.TOKEN);
 
         } else {
             throw new RuntimeException("Unexpected state occured. Null station object passed to station details view.");
@@ -86,7 +90,7 @@ public class ChartsFragment extends Fragment {
     }
 
     private void getChartDataFromServer(LineChart chart, SwipeRefreshLayout refresher) {
-        MeteoStationService meteoStationService = new MeteoStationServiceImpl(requestQueue);
+        MeteoStationService meteoStationService = new MeteoStationServiceImpl(requestQueue, token);
         meteoStationService.getChartData(stationId, samples, intervalMinutes,
                 response -> {
                     try {
