@@ -59,10 +59,10 @@ public class StationsListActivity extends AppCompatActivity {
         requestQueue = ApplicationController.getInstance(getApplicationContext()).getRequestQueue();
         authService = new AuthServiceImpl(requestQueue);
         intent = getIntent();
-
+        token = getToken();
         if (!isUserAuthorized()) {
             redirectToLoginActivity(intent);
-        } else if (getToken() == null){
+        } else if (token == null){
             SharedPreferences sharedPreferences = getSharedPreferences(CONFIG.LOGIN_PREFERENCES_KEY, MODE_PRIVATE);
             String username = sharedPreferences.getString(CONFIG.USERNAME, null);
             String password = sharedPreferences.getString(CONFIG.PASSWORD_KEY, null);
