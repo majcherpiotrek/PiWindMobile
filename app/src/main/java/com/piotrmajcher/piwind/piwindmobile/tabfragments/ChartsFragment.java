@@ -10,19 +10,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.volley.RequestQueue;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.piotrmajcher.piwind.piwindmobile.R;
+import com.piotrmajcher.piwind.piwindmobile.config.CONFIG;
 import com.piotrmajcher.piwind.piwindmobile.dto.ChartDataTO;
 import com.piotrmajcher.piwind.piwindmobile.models.ChartData;
-import com.piotrmajcher.piwind.piwindmobile.rest.MeteoStationRestService;
-import com.piotrmajcher.piwind.piwindmobile.rest.impl.MeteoStationRestServiceImpl;
+import com.piotrmajcher.piwind.piwindmobile.services.MeteoStationService;
+import com.piotrmajcher.piwind.piwindmobile.services.impl.MeteoStationServiceImpl;
 import com.piotrmajcher.piwind.piwindmobile.tabfragments.chartutils.DateTimeXAxisValueFormatter;
 import com.piotrmajcher.piwind.piwindmobile.util.JsonToObjectsParser;
 import com.piotrmajcher.piwind.piwindmobile.util.impl.JsonToObjectParserImpl;
@@ -44,12 +45,16 @@ public class ChartsFragment extends Fragment {
     private UUID stationId;
     private LineChart chart;
     private List<ChartData> windChartData;
+    private RequestQueue requestQueue;
+    private String token;
 
-    public static ChartsFragment newInstance(String meteoStationId) {
+    public static ChartsFragment newInstance(String meteoStationId, String token, RequestQueue requestQueue) {
         ChartsFragment f = new ChartsFragment();
         Bundle args = new Bundle();
         args.putSerializable("meteoStationId", meteoStationId);
+        args.putSerializable(CONFIG.TOKEN, token);
         f.setArguments(args);
+        f.requestQueue = requestQueue;
         return f;
     }
 
@@ -60,6 +65,7 @@ public class ChartsFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null  && args.getString("meteoStationId") != null) {
             stationId = UUID.fromString(args.getString("meteoStationId").trim());
+            token = args.getString(CONFIG.TOKEN);
 
         } else {
             throw new RuntimeException("Unexpected state occured. Null station object passed to station details view.");
@@ -84,8 +90,8 @@ public class ChartsFragment extends Fragment {
     }
 
     private void getChartDataFromServer(LineChart chart, SwipeRefreshLayout refresher) {
-        MeteoStationRestService meteoStationRestService = new MeteoStationRestServiceImpl();
-        meteoStationRestService.getChartData(stationId, samples, intervalMinutes,
+        MeteoStationService meteoStationService = new MeteoStationServiceImpl(requestQueue, token);
+        meteoStationService.getChartData(stationId, samples, intervalMinutes,
                 response -> {
                     try {
                         JsonToObjectsParser parser = new JsonToObjectParserImpl();
@@ -94,7 +100,8 @@ public class ChartsFragment extends Fragment {
                         for (ChartDataTO to : tos) {
                             result.add(new ChartData(to));
                         }
-                        windChartData = result;
+//                        windChartData = result;
+                        windChartData = generateRandomData(20, 5 * 60 * 1000);
                         LineData lineData = createWindChartLineData(windChartData);
                         setupAxis(chart, windChartData);
                         setupChart(chart, lineData);
@@ -159,11 +166,8 @@ public class ChartsFragment extends Fragment {
         xAxis.setDrawGridLines(false);
         xAxis.setValueFormatter(new DateTimeXAxisValueFormatter(createDatesXAxisLabels(windChartData)));
 
-        YAxis left = chart.getAxisLeft();
-        left.setStartAtZero(true);
-        YAxis right = chart.getAxisRight();
-        right.setStartAtZero(true);
-
+//        chart.getAxisLeft().setAxisMinimum(0f);
+//        chart.getAxisRight().setAxisMinimum(0f);
     }
 
     private Date[] createDatesXAxisLabels(List<ChartData> data) {

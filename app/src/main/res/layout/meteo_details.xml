@@ -13,7 +13,7 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingTop="10dp"
-        tools:context="com.piotrmajcher.piwind.piwindmobile.StationViewActivity">
+        tools:context="com.piotrmajcher.piwind.piwindmobile.activities.StationViewActivity">
 
         <ImageView
             android:id="@+id/snapshot"

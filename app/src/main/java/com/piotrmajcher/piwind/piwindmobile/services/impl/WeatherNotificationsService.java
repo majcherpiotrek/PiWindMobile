@@ -1,4 +1,4 @@
-package com.piotrmajcher.piwind.piwindmobile.services;
+package com.piotrmajcher.piwind.piwindmobile.services.impl;
 
 import android.util.Log;
 

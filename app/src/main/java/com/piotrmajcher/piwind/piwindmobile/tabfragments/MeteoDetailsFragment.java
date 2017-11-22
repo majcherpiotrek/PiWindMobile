@@ -1,6 +1,5 @@
 package com.piotrmajcher.piwind.piwindmobile.tabfragments;
 
-import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -15,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.piotrmajcher.piwind.piwindmobile.R;
-import com.piotrmajcher.piwind.piwindmobile.WEBSOCKET;
+import com.piotrmajcher.piwind.piwindmobile.config.WEBSOCKET;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoDataTO;
 import com.piotrmajcher.piwind.piwindmobile.models.MeteoData;
 import com.piotrmajcher.piwind.piwindmobile.websocket.MeteoDataUpdateListener;
