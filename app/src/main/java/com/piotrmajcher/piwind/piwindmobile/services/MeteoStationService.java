@@ -17,4 +17,8 @@ public interface MeteoStationService {
     void getChartData(UUID stationId, int samples, int intervalMinutes,
                       Response.Listener<JSONArray> responseListener,
                       Response.ErrorListener errorListener);
+
+    void requestNotifications(UUID stationId, Integer minWindLimit,
+                              Response.Listener<String> responseListener,
+                              Response.ErrorListener errorListener);
 }

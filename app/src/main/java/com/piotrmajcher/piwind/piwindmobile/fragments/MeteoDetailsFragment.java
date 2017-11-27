@@ -1,4 +1,4 @@
-package com.piotrmajcher.piwind.piwindmobile.tabfragments;
+package com.piotrmajcher.piwind.piwindmobile.fragments;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

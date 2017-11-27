@@ -191,9 +191,6 @@ public class StationsListActivity extends AppCompatActivity {
             JsonToObjectParserImpl<MeteoStationTO> parser = new JsonToObjectParserImpl<>();
             try {
                 List<MeteoStationTO> meteoStationTOs = parser.parseJSONArray(response, MeteoStationTO.class);
-                for (MeteoStationTO meteoStationTO : meteoStationTOs) {
-                    FirebaseMessaging.getInstance().subscribeToTopic(meteoStationTO.getId().toString());
-                }
                 listAdapter.updateStationsList(meteoStationTOs);
             } catch (JSONException e) {
                 Log.e(TAG, "Failed to parse the meteo stations list");

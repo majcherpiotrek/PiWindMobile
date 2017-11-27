@@ -10,6 +10,7 @@ import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.piotrmajcher.piwind.piwindmobile.config.REST;
 import com.piotrmajcher.piwind.piwindmobile.services.MeteoStationService;
 
@@ -24,6 +25,7 @@ public class MeteoStationServiceImpl implements MeteoStationService {
     private static final String TAG = MeteoStationServiceImpl.class.getName();
     private static final String GET_STATIONS_LIST_URL = REST.BASE_URL + REST.GET_STATIONS_LIST_ENDPOINT;
     private static final String GET_CHART_DATA_BASE_URL = REST.BASE_URL + REST.STATISTIC_ENDPOINT;
+    private static final String REQUEST_NOTIFICATIONS_URL = REST.BASE_URL + REST.NOTIFICATIONS_ENDPOINT;
     private RequestQueue requestQueue;
     private String token;
 
@@ -81,6 +83,33 @@ public class MeteoStationServiceImpl implements MeteoStationService {
 
         Log.i(TAG, "Sending request to: " + chartDataRequest.getUrl());
         requestQueue.add(chartDataRequest);
+        Log.i(TAG, "Request sent.");
+    }
+
+    @Override
+    public void requestNotifications(UUID stationId, Integer minWindLimit, Response.Listener<String> responseListener, Response.ErrorListener errorListener) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(REQUEST_NOTIFICATIONS_URL);
+        sb.append("/");
+        sb.append(stationId.toString());
+        sb.append("/min-wind/");
+        sb.append(minWindLimit);
+        sb.append("/");
+        String URL = sb.toString();
+
+        StringRequest notificationsRequest = new StringRequest(Request.Method.GET, URL,
+                responseListener,
+                errorListener) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", token);
+                return headers;
+            }
+        };
+
+        Log.i(TAG, "Sending request to: " + notificationsRequest.getUrl());
+        requestQueue.add(notificationsRequest);
         Log.i(TAG, "Request sent.");
     }
 

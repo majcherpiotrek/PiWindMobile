@@ -1,4 +1,4 @@
-package com.piotrmajcher.piwind.piwindmobile.tabfragments.chartutils;
+package com.piotrmajcher.piwind.piwindmobile.fragments.chartutils;
 
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
