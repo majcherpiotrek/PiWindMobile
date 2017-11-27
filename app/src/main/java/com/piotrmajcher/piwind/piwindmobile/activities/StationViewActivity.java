@@ -7,7 +7,10 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.android.volley.RequestQueue;
@@ -29,6 +32,8 @@ public class StationViewActivity extends AppCompatActivity {
     private MeteoStationTO meteoStationTO;
     private TabLayout tabLayout;
     private String token;
+    private Toolbar toolbar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +41,15 @@ public class StationViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_station_view);
         Log.d(TAG, "onCreate: Starting...");
 
+        toolbar = (Toolbar) findViewById(R.id.toolbar); // Attaching the layout to the toolbar object
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         token = ApplicationController.getInstance(getApplicationContext()).getToken();
         meteoStationTO = (MeteoStationTO) getIntent().getSerializableExtra(StationsListActivity.SELECTED_STATION);
-        if (super.getSupportActionBar() != null) {
-            super.getSupportActionBar().setTitle(meteoStationTO.getName());
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(meteoStationTO.getName());
         }
 
         mSectionsPageAdapter = new SectionsPageAdapter(getSupportFragmentManager());
@@ -76,6 +86,34 @@ public class StationViewActivity extends AppCompatActivity {
             tabLayout.setVisibility(View.GONE);
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_station_view, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings: {
+                Log.i(TAG, "Settings selected!");
+                return true;
+            }
+            case R.id.action_set_alert: {
+                Log.i(TAG, "Set alert selected!");
+                return true;
+            }
+
+            default: {
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+            }
+        }
+    }
+
 
     private void setupSectionsPageAdapter(SectionsPageAdapter adapter) {
         adapter.addFragment(MeteoDetailsFragment.newInstance(meteoStationTO.getId().toString()), "Meteo");
