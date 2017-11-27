@@ -65,7 +65,7 @@ public class StationsListAdapter extends BaseAdapter {
 
         viewHolder.stationName.setText(stationsList.get(position).getName());
         viewHolder.stationDescription.setText(stationsList.get(position).getStationBaseURL());
-        viewHolder.stationThumbnail.setImageResource(R.drawable.ic_action_name);
+        viewHolder.stationThumbnail.setImageResource(R.drawable.ic_bell_disabled);
 
         convertView.setTag(viewHolder);
 
