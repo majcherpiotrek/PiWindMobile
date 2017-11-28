@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="temperature_units_array">
+        <item>\u2103</item>
+        <item>\u2109</item>
+    </string-array>
+
+    <string-array name="wind_units_array">
+        <item>kts</item>
+        <item>m/s</item>
+        <item>km/h</item>
+    </string-array>
+</resources>

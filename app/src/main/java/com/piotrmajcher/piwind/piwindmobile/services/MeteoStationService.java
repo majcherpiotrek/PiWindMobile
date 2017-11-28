@@ -21,4 +21,8 @@ public interface MeteoStationService {
     void requestNotifications(UUID stationId, Integer minWindLimit,
                               Response.Listener<String> responseListener,
                               Response.ErrorListener errorListener);
+
+    void cancelNotifications(UUID stationId,
+                              Response.Listener<String> responseListener,
+                              Response.ErrorListener errorListener);
 }

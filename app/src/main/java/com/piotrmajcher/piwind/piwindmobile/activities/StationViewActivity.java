@@ -16,12 +16,12 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.piotrmajcher.piwind.piwindmobile.ApplicationController;
 import com.piotrmajcher.piwind.piwindmobile.R;
@@ -106,14 +106,16 @@ public class StationViewActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(final Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_station_view, menu);
+        changeAlertIconState(isUserAlreadySubscribedToStationTopic(meteoStationTO));
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_settings: {
-                Log.i(TAG, "Settings selected!");
+            case R.id.action_change_units: {
+                Log.i(TAG, "Change units selected!");
+                showChangeUnitsAlertDialog();
                 return true;
             }
             case R.id.action_set_alert: {
@@ -121,6 +123,7 @@ public class StationViewActivity extends AppCompatActivity {
                 Log.i(TAG, "Set alert selected!");
                 return true;
             }
+
 
             default: {
                 // If we got here, the user's action was not recognized.
@@ -130,6 +133,35 @@ public class StationViewActivity extends AppCompatActivity {
         }
     }
 
+    private void showChangeUnitsAlertDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogStyle));
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogLayout = inflater.inflate(R.layout.change_units_dialog_layout, null);
+        builder.setView(dialogLayout)
+                .setTitle("Change units")
+                .setPositiveButton("Ok", (dialog, which) -> {
+
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> {
+
+                });
+
+        Spinner windUnitsSpinner = (Spinner) dialogLayout.findViewById(R.id.wind_speed_units_spinner);
+        Spinner temperatureUnitsSpinner = (Spinner) dialogLayout.findViewById(R.id.temperature_units_spinner);
+
+        ArrayAdapter<CharSequence> adapterWindUnits = ArrayAdapter.createFromResource(this,
+                R.array.wind_units_array, android.R.layout.simple_spinner_item);
+        adapterWindUnits.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        windUnitsSpinner.setAdapter(adapterWindUnits);
+
+        ArrayAdapter<CharSequence> adapterTemperatureUnits = ArrayAdapter.createFromResource(this,
+                R.array.temperature_units_array, android.R.layout.simple_spinner_item);
+        adapterTemperatureUnits.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        temperatureUnitsSpinner.setAdapter(adapterTemperatureUnits);
+
+        builder.create();
+        builder.show();
+    }
     private void showSetWindAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogStyle));
         LayoutInflater inflater = getLayoutInflater();
@@ -140,15 +172,23 @@ public class StationViewActivity extends AppCompatActivity {
                 .setPositiveButton("Ok", (dialog, which) -> {
                     SeekBar seekBar = (SeekBar) dialogLayout.findViewById(R.id.wind_limit_seekbar);
                     Log.i(TAG, "Fetched value: " + seekBar.getProgress());
-                    susbscribeToFirebase();
-                    requestNotifications(seekBar.getProgress());
-                    // TODO sign to firebase topic and send request for notifications, update icon to yellow
+                    if (!isUserAlreadySubscribedToStationTopic(meteoStationTO)) {
+                        susbscribeToFirebase(meteoStationTO);
+                        saveStationSubscriptionInPreferences(meteoStationTO);
+                    }
+
+                    // Can be either new notification or update the wind limit of exisitng one
+                    requestNotifications(meteoStationTO, seekBar.getProgress());
                 })
                 .setNeutralButton("Remove alert", (dialog, which) -> {
-                    // TODO usign from firebase topic and send request to cancel notifications, update icon to gray
+                    if (isUserAlreadySubscribedToStationTopic(meteoStationTO)) {
+                        unsubscribeFromFirebase(meteoStationTO);
+                        cancelNotifications(meteoStationTO);
+                        removestationSubscriptionFromPreferences(meteoStationTO);
+                    }
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
-
+                    // Does nothing
                 });
         SeekBar seekBar = (SeekBar) dialogLayout.findViewById(R.id.wind_limit_seekbar);
         TextView selectedWindLimitTextView = (TextView) dialogLayout.findViewById(R.id.selected_wind_value);
@@ -159,17 +199,37 @@ public class StationViewActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void requestNotifications(Integer minWindLimit) {
+    private void cancelNotifications(MeteoStationTO meteoStationTO) {
+        meteoStationService.cancelNotifications(meteoStationTO.getId(),
+                response -> {
+                    Log.i(TAG, "Cancel notifications response: " + response);
+                    changeAlertIconState(false);
+                }, error -> {
+
+                });
+    }
+
+    private void changeAlertIconState(boolean enabled) {
+        if (enabled) {
+            toolbar.getMenu().getItem(0).setIcon(R.drawable.ic_alert_enabled);
+        } else {
+            toolbar.getMenu().getItem(0).setIcon(R.drawable.ic_alert_disabled);
+        }
+    }
+
+    private void requestNotifications(MeteoStationTO meteoStationTO, Integer minWindLimit) {
         meteoStationService.requestNotifications(meteoStationTO.getId(), minWindLimit,
-                response -> Log.i(TAG, response),
+                response -> {
+                    Log.i(TAG, "Request notifications response: " + response);
+                    changeAlertIconState(true);
+                },
                 error -> {
 
                 });
     }
 
-    private void susbscribeToFirebase() {
-        SharedPreferences sharedPreferences = getSharedPreferences(CONFIG.LOGIN_PREFERENCES_KEY, MODE_PRIVATE);
-        String username = sharedPreferences.getString(CONFIG.USERNAME, null);
+    private void susbscribeToFirebase(MeteoStationTO meteoStationTO) {
+        String username = getLoggedInUsername();
         if (username != null) {
             StringBuilder sb = new StringBuilder();
             sb.append(meteoStationTO.getId().toString());
@@ -177,6 +237,17 @@ public class StationViewActivity extends AppCompatActivity {
             FirebaseMessaging.getInstance().subscribeToTopic(sb.toString());
         }
     }
+
+    private void unsubscribeFromFirebase(MeteoStationTO meteoStationTO) {
+        String username = getLoggedInUsername();
+        if (username != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(meteoStationTO.getId().toString());
+            sb.append(username);
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(sb.toString());
+        }
+    }
+
 
     @NonNull
     private SeekBar.OnSeekBarChangeListener getWindLimitSeekbarChangeListener(final TextView selectedWindLimitTextView) {
@@ -216,5 +287,29 @@ public class StationViewActivity extends AppCompatActivity {
 
     private String getToken() {
         return ApplicationController.getInstance(getApplicationContext()).getToken();
+    }
+
+    private String getLoggedInUsername() {
+        SharedPreferences sharedPreferences = getSharedPreferences(CONFIG.LOGIN_PREFERENCES_KEY, MODE_PRIVATE);
+        return sharedPreferences.getString(CONFIG.USERNAME, null);
+    }
+
+    private boolean isUserAlreadySubscribedToStationTopic(MeteoStationTO meteoStationTO) {
+        SharedPreferences sharedPreferences = getSharedPreferences(CONFIG.NOTIFICATIONS_PREFERENCES_KEY, MODE_PRIVATE);
+        return sharedPreferences.getBoolean(meteoStationTO.getId().toString(), false);
+    }
+
+    private void saveStationSubscriptionInPreferences(MeteoStationTO meteoStationTO) {
+        SharedPreferences sharedPreferences = getSharedPreferences(CONFIG.NOTIFICATIONS_PREFERENCES_KEY, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(meteoStationTO.getId().toString(), true);
+        editor.apply();
+    }
+
+    private void removestationSubscriptionFromPreferences(MeteoStationTO meteoStationTO) {
+        SharedPreferences sharedPreferences = getSharedPreferences(CONFIG.NOTIFICATIONS_PREFERENCES_KEY, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(meteoStationTO.getId().toString());
+        editor.apply();
     }
 }

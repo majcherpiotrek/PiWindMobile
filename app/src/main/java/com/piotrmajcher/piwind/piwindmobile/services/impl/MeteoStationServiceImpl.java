@@ -25,7 +25,8 @@ public class MeteoStationServiceImpl implements MeteoStationService {
     private static final String TAG = MeteoStationServiceImpl.class.getName();
     private static final String GET_STATIONS_LIST_URL = REST.BASE_URL + REST.GET_STATIONS_LIST_ENDPOINT;
     private static final String GET_CHART_DATA_BASE_URL = REST.BASE_URL + REST.STATISTIC_ENDPOINT;
-    private static final String REQUEST_NOTIFICATIONS_URL = REST.BASE_URL + REST.NOTIFICATIONS_ENDPOINT;
+    private static final String REQUEST_NOTIFICATIONS_URL = REST.BASE_URL + REST.REQUEST_NOTIFICATIONS_ENDPOINT;
+    private static final String CANCEL_NOTIFICATIONS_URL = REST.BASE_URL + REST.CANCEL_NOTIFICATIONS_ENDPOINT;
     private RequestQueue requestQueue;
     private String token;
 
@@ -110,6 +111,30 @@ public class MeteoStationServiceImpl implements MeteoStationService {
 
         Log.i(TAG, "Sending request to: " + notificationsRequest.getUrl());
         requestQueue.add(notificationsRequest);
+        Log.i(TAG, "Request sent.");
+    }
+
+    @Override
+    public void cancelNotifications(UUID stationId, Response.Listener<String> responseListener, Response.ErrorListener errorListener) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(CANCEL_NOTIFICATIONS_URL);
+        sb.append("/");
+        sb.append(stationId.toString());
+        String URL = sb.toString();
+
+        StringRequest cancelNotificationsRequest = new StringRequest(Request.Method.GET, URL,
+                responseListener,
+                errorListener) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", token);
+                return headers;
+            }
+        };
+
+        Log.i(TAG, "Sending request to: " + cancelNotificationsRequest.getUrl());
+        requestQueue.add(cancelNotificationsRequest);
         Log.i(TAG, "Request sent.");
     }
 

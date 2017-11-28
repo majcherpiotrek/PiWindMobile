@@ -6,14 +6,20 @@
     <item
         android:id="@+id/action_set_alert"
         android:orderInCategory="1"
-        android:icon="@drawable/ic_alert_diabled"
+        android:icon="@drawable/ic_alert_disabled"
         android:title="@string/action_set_alert"
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_change_units"
         android:orderInCategory="2"
-        android:title="@string/action_settings"
+        android:title="@string/action_change_units"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_logout"
+        android:orderInCategory="3"
+        android:title="@string/action_logout"
         app:showAsAction="never"/>
 
 </menu>

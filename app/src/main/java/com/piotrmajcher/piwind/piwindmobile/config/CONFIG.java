@@ -5,6 +5,7 @@ public interface CONFIG {
     String NAME_KEY = "name";
     String URL_KEY = "stationBaseURL";
     String LOGIN_PREFERENCES_KEY = "Login";
+    String NOTIFICATIONS_PREFERENCES_KEY = "Notifications";
     String USERNAME = "username";
     String PASSWORD_KEY = "password";
     String TOKEN = "token";
