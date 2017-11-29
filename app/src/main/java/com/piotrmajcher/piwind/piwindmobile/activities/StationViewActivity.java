@@ -1,5 +1,6 @@
 package com.piotrmajcher.piwind.piwindmobile.activities;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -127,6 +128,11 @@ public class StationViewActivity extends AppCompatActivity {
             case R.id.action_set_alert: {
                 showSetWindAlertDialog();
                 Log.i(TAG, "Set alert selected!");
+                return true;
+            }
+
+            case R.id.action_logout: {
+                redirectToLoginActivity();
                 return true;
             }
 
@@ -330,5 +336,12 @@ public class StationViewActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(meteoStationTO.getId().toString());
         editor.apply();
+    }
+
+    private void redirectToLoginActivity() {
+        Intent loginActivityIntent = new Intent(this, LoginActivity.class);
+        loginActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(loginActivityIntent);
+        this.finish();
     }
 }
