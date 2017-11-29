@@ -8,6 +8,11 @@
     android:orientation="vertical"
     tools:context="com.piotrmajcher.piwind.piwindmobile.activities.StationsListActivity">
 
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"
+        />
+
     <android.support.v4.widget.SwipeRefreshLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swiperefresh"

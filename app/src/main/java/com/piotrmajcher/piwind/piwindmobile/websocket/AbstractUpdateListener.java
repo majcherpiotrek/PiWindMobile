@@ -6,11 +6,12 @@ import java.util.UUID;
 
 import okhttp3.WebSocketListener;
 
-public abstract class AbstractUpdateListener<T> extends WebSocketListener{
+abstract class AbstractUpdateListener<T> extends WebSocketListener{
     UUID stationId;
     UpdateHandler<T> updateHandler;
 
-    public AbstractUpdateListener(UUID stationId, UpdateHandler<T> updateHandler) {
+    AbstractUpdateListener(UUID stationId, UpdateHandler<T> updateHandler) {
+        super();
         this.stationId = stationId;
         this.updateHandler = updateHandler;
     }

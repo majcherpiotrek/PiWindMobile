@@ -1,4 +1,4 @@
-package com.piotrmajcher.piwind.piwindmobile.tabfragments;
+package com.piotrmajcher.piwind.piwindmobile.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -24,7 +24,7 @@ import com.piotrmajcher.piwind.piwindmobile.dto.ChartDataTO;
 import com.piotrmajcher.piwind.piwindmobile.models.ChartData;
 import com.piotrmajcher.piwind.piwindmobile.services.MeteoStationService;
 import com.piotrmajcher.piwind.piwindmobile.services.impl.MeteoStationServiceImpl;
-import com.piotrmajcher.piwind.piwindmobile.tabfragments.chartutils.DateTimeXAxisValueFormatter;
+import com.piotrmajcher.piwind.piwindmobile.fragments.chartutils.DateTimeXAxisValueFormatter;
 import com.piotrmajcher.piwind.piwindmobile.util.JsonToObjectsParser;
 import com.piotrmajcher.piwind.piwindmobile.util.impl.JsonToObjectParserImpl;
 

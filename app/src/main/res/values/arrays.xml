@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="temperature_units_array">
+        <item>@string/unit_celsius</item>
+        <item>@string/unit_fahrenheit</item>
+    </string-array>
+
+    <string-array name="wind_units_array">
+        <item>@string/unit_knots</item>
+        <item>@string/unit_mps</item>
+        <item>@string/unit_kmh</item>
+    </string-array>
+</resources>

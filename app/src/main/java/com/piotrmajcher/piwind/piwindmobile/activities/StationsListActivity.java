@@ -5,20 +5,17 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.piotrmajcher.piwind.piwindmobile.ApplicationController;
-import com.piotrmajcher.piwind.piwindmobile.config.CONFIG;
 import com.piotrmajcher.piwind.piwindmobile.R;
 import com.piotrmajcher.piwind.piwindmobile.adapters.StationsListAdapter;
+import com.piotrmajcher.piwind.piwindmobile.config.CONFIG;
 import com.piotrmajcher.piwind.piwindmobile.config.REST;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoStationTO;
 import com.piotrmajcher.piwind.piwindmobile.services.AuthService;
@@ -26,7 +23,6 @@ import com.piotrmajcher.piwind.piwindmobile.services.MeteoStationService;
 import com.piotrmajcher.piwind.piwindmobile.services.impl.AuthServiceImpl;
 import com.piotrmajcher.piwind.piwindmobile.services.impl.MeteoStationServiceImpl;
 import com.piotrmajcher.piwind.piwindmobile.util.impl.JsonToObjectParserImpl;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,6 +45,7 @@ public class StationsListActivity extends AppCompatActivity {
     private Intent intent;
     private AuthService authService;
     private RequestQueue requestQueue;
+    private Toolbar toolbar;
 
 
     @Override
@@ -94,6 +91,7 @@ public class StationsListActivity extends AppCompatActivity {
         editor.remove(CONFIG.PASSWORD_KEY);
         editor.remove(CONFIG.USERNAME);
         editor.remove(CONFIG.IS_USER_AUTHORIZED_KEY);
+        editor.apply();
     }
 
     private void initActivity() {
@@ -179,6 +177,9 @@ public class StationsListActivity extends AppCompatActivity {
             getStationsListFromServer();
             refresher.setRefreshing(false);
         });
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar); // Attaching the layout to the toolbar object
+        setSupportActionBar(toolbar);
     }
 
     public void getStationsListFromServer() {
@@ -186,9 +187,6 @@ public class StationsListActivity extends AppCompatActivity {
             JsonToObjectParserImpl<MeteoStationTO> parser = new JsonToObjectParserImpl<>();
             try {
                 List<MeteoStationTO> meteoStationTOs = parser.parseJSONArray(response, MeteoStationTO.class);
-                for (MeteoStationTO meteoStationTO : meteoStationTOs) {
-                    FirebaseMessaging.getInstance().subscribeToTopic(meteoStationTO.getId().toString());
-                }
                 listAdapter.updateStationsList(meteoStationTOs);
             } catch (JSONException e) {
                 Log.e(TAG, "Failed to parse the meteo stations list");
@@ -208,6 +206,7 @@ public class StationsListActivity extends AppCompatActivity {
                 editor.putString(CONFIG.USERNAME, null);
                 editor.putString(CONFIG.PASSWORD_KEY, null);
                 editor.putBoolean(CONFIG.IS_USER_AUTHORIZED_KEY, false);
+                editor.apply();
                 redirectToLoginActivity(intent);
             }
         });

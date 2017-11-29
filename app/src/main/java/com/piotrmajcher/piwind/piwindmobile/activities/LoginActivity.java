@@ -5,7 +5,9 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -28,8 +30,10 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passwordInput;
     private Button loginButton;
     private TextView register;
+    private TextView errorLabel;
     private AuthService authService;
     private Intent intent;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,7 +72,9 @@ public class LoginActivity extends AppCompatActivity {
     private void startActivityBasedOnIntent(Intent intent) {
         Bundle extras = intent.getExtras();
         Intent stationsListIntent = new Intent(this, StationsListActivity.class);
-     
+        runOnUiThread(() -> {
+            errorLabel.setVisibility(View.GONE);
+        });
         if (extras != null && extras.containsKey(CONFIG.ID_KEY) && extras.containsKey(CONFIG.NAME_KEY) && extras.containsKey(CONFIG.URL_KEY)) {
             stationsListIntent.putExtra(CONFIG.ID_KEY, extras.getString(CONFIG.ID_KEY));
             stationsListIntent.putExtra(CONFIG.NAME_KEY, extras.getString(CONFIG.NAME_KEY));
@@ -97,13 +103,27 @@ public class LoginActivity extends AppCompatActivity {
                 );
             } catch (JSONException e) {
                 Log.e(TAG, "Could not send request");
+                runOnUiThread(() -> {
+                    errorLabel.setText("Unexpected error");
+                    errorLabel.setVisibility(View.VISIBLE);
+                });
             }
         }
     }
 
     private void handleError(VolleyError error) {
-        // TODO set error label text
-        Log.e(TAG, "error: " + new String(error.networkResponse.data));
+        String errorMsg = new String(error.networkResponse.data);
+        Log.e(TAG, "error: " + errorMsg);
+        runOnUiThread(() -> {
+            try {
+                JSONObject jsonObject = new JSONObject(errorMsg);
+                errorLabel.setText(jsonObject.get("message").toString());
+                errorLabel.setVisibility(View.VISIBLE);
+            } catch (JSONException e) {
+                errorLabel.setText("Unexpected error");
+                errorLabel.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     private void handleResponse(String username, String password, JSONObject response) {
@@ -123,5 +143,9 @@ public class LoginActivity extends AppCompatActivity {
         passwordInput = (EditText) findViewById(R.id.password_input);
         loginButton = (Button) findViewById(R.id.login_button);
         register = (TextView) findViewById(R.id.register_text);
+        errorLabel = (TextView) findViewById(R.id.login_error_label);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar); // Attaching the layout to the toolbar object
+        setSupportActionBar(toolbar);
     }
 }

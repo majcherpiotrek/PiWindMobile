@@ -1,5 +1,6 @@
-package com.piotrmajcher.piwind.piwindmobile.tabfragments;
+package com.piotrmajcher.piwind.piwindmobile.fragments;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -14,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.piotrmajcher.piwind.piwindmobile.R;
+import com.piotrmajcher.piwind.piwindmobile.config.CONFIG;
 import com.piotrmajcher.piwind.piwindmobile.config.WEBSOCKET;
 import com.piotrmajcher.piwind.piwindmobile.dto.MeteoDataTO;
 import com.piotrmajcher.piwind.piwindmobile.models.MeteoData;
@@ -26,6 +28,8 @@ import java.util.UUID;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.WebSocket;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class MeteoDetailsFragment extends Fragment {
     private static final String TAG = MeteoDetailsFragment.class.getName();
@@ -45,6 +49,10 @@ public class MeteoDetailsFragment extends Fragment {
     private WebSocket webSocketSnapshots;
     private String meteoStationId;
     private View view;
+    private String windUnit;
+    private String temperatureUnit;
+    private Double windFactor;
+    private MeteoData meteoData;
 
     public static MeteoDetailsFragment newInstance(String meteoStationId) {
         MeteoDetailsFragment f = new MeteoDetailsFragment();
@@ -64,6 +72,32 @@ public class MeteoDetailsFragment extends Fragment {
 
         } else {
             throw new RuntimeException("Unexpected state occured. Null station object passed to station details view.");
+        }
+
+
+        setUpWindAndTemperatureUnits();
+    }
+
+    private void setUpWindAndTemperatureUnits() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(CONFIG.UNITS_PREFERENCES_KEY, MODE_PRIVATE);
+        windUnit = sharedPreferences.getString(CONFIG.WIND_UNIT_KEY,null);
+        temperatureUnit = sharedPreferences.getString(CONFIG.TEMPERATURE_UNIT_KEY, null);
+        if (windUnit == null || temperatureUnit == null) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            windUnit = getString(R.string.unit_knots);
+            windFactor = CONFIG.MPS_TO_KTS;
+            temperatureUnit = getString(R.string.unit_celsius);
+            editor.putString(CONFIG.WIND_UNIT_KEY, windUnit);
+            editor.putString(CONFIG.TEMPERATURE_UNIT_KEY, temperatureUnit);
+            editor.apply();
+        } else {
+            if (this.windUnit.equals(getString(R.string.unit_knots))) {
+                this.windFactor = CONFIG.MPS_TO_KTS;
+            } else if (this.windUnit.equals(getString(R.string.unit_kmh))) {
+                this.windFactor = CONFIG.MPS_TO_KMH;
+            } else {
+                this.windFactor = 1.0;
+            }
         }
     }
 
@@ -104,26 +138,37 @@ public class MeteoDetailsFragment extends Fragment {
             snapshotImageView.setImageBitmap(bitmap);
         });
     }
-    private void updateMeteoDataText(MeteoDataTO meteoDataTO) {
-        MeteoData meteoData = new MeteoData(meteoDataTO);
-        final String windSpeed = df.format(meteoData.getWindSpeed()) + " mps";
-        String[] split = meteoData.getWindDirectionDescription().split("-", 2);
-        final String windDir = split[0].trim();
-        split[1] = split[1].trim();
-        split[1] = split[1].substring(0,1).toUpperCase() + split[1].substring(1);
-        final String windDirDesc = split[1];
-        final String windBft = meteoData.getBeaufortCategoryDescription();
-        final String temperatureData = df.format(meteoData.getTemperature()) + "\u2103";
-        final String temperatureDataDesc = meteoData.getTemperatureConditionsDescription();
+    private void updateMeteoData(MeteoDataTO meteoDataTO) {
+        meteoData = new MeteoData(meteoDataTO);
+        updateMeteoDataText();
+    }
 
-        getActivity().runOnUiThread(() -> {
-            windSpeedTextView.setText(windSpeed);
-            windDirectionTextView.setText(windDir);
-            windDirectionDescTextView.setText(windDirDesc);
-            windBftTextView.setText(windBft);
-            temperatureDataTextView.setText(temperatureData);
-            temperatureDataDescTextView.setText(temperatureDataDesc);
-        });
+    private void updateMeteoDataText() {
+        if (meteoData != null) {
+            setUpWindAndTemperatureUnits();
+            final String windSpeed = df.format(meteoData.getWindSpeed() * windFactor) + " " + windUnit;
+            String[] split = meteoData.getWindDirectionDescription().split("-", 2);
+            final String windDir = split[0].trim();
+            split[1] = split[1].trim();
+            split[1] = split[1].substring(0,1).toUpperCase() + split[1].substring(1);
+            final String windDirDesc = split[1];
+            final String windBft = meteoData.getBeaufortCategoryDescription();
+            Double temp = meteoData.getTemperature();
+            if (temperatureUnit.equals(getString(R.string.unit_fahrenheit))) {
+                temp = temp * CONFIG.CELSIUS_TO_FAHRENHEIT_MULTIPLIET + CONFIG.CELSIUS_TO_FAHRENHEIT_ADDER;
+            }
+            final String temperatureData = df.format(temp) + temperatureUnit;
+            final String temperatureDataDesc = meteoData.getTemperatureConditionsDescription();
+
+            getActivity().runOnUiThread(() -> {
+                windSpeedTextView.setText(windSpeed);
+                windDirectionTextView.setText(windDir);
+                windDirectionDescTextView.setText(windDirDesc);
+                windBftTextView.setText(windBft);
+                temperatureDataTextView.setText(temperatureData);
+                temperatureDataDescTextView.setText(temperatureDataDesc);
+            });
+        }
     }
 
     private void initUpdateListeners() {
@@ -133,7 +178,7 @@ public class MeteoDetailsFragment extends Fragment {
         );
         meteoDataUpdateListener = new MeteoDataUpdateListener(
                 UUID.fromString(meteoStationId.trim()),
-                this::updateMeteoDataText
+                this::updateMeteoData
         );
     }
 

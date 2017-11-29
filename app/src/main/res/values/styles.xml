@@ -16,10 +16,20 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="AppTheme.ActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="actionMenuTextColor">@color/colorPrimaryDark</item>
+    </style>
+
     <style name="AppTheme.Tabs" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:background">@color/actionBarBackground</item>
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="AlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textColorPrimary">@color/colorPrimaryDark</item>
+    </style>
 
 </resources>

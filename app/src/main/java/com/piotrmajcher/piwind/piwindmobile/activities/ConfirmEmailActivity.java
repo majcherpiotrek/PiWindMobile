@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +27,7 @@ public class ConfirmEmailActivity extends AppCompatActivity {
     private EditText confirmationCodeInput;
     private TextView errorLabel;
     private AuthService authService;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,5 +85,10 @@ public class ConfirmEmailActivity extends AppCompatActivity {
         confirmEmailButton = (Button) findViewById(R.id.confirm_email_button);
         confirmationCodeInput = (EditText) findViewById(R.id.confirmation_code_input);
         errorLabel = (TextView) findViewById(R.id.confirm_email_error_label);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar); // Attaching the layout to the toolbar object
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 }
