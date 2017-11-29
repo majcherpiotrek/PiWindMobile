@@ -46,7 +46,6 @@ public class StationViewActivity extends AppCompatActivity {
     private RequestQueue requestQueue;
     private MeteoStationService meteoStationService;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,10 +55,7 @@ public class StationViewActivity extends AppCompatActivity {
         requestQueue = ApplicationController.getInstance(getApplicationContext()).getRequestQueue();
         meteoStationService = new MeteoStationServiceImpl(requestQueue, getToken());
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar); // Attaching the layout to the toolbar object
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        setupToolbar();
 
         token = ApplicationController.getInstance(getApplicationContext()).getToken();
         meteoStationTO = (MeteoStationTO) getIntent().getSerializableExtra(StationsListActivity.SELECTED_STATION);
@@ -89,6 +85,16 @@ public class StationViewActivity extends AppCompatActivity {
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+
+    }
+
+
+    private void setupToolbar() {
+        toolbar = (Toolbar) findViewById(R.id.toolbar); // Attaching the layout to the toolbar object
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     @Override
@@ -137,31 +143,44 @@ public class StationViewActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogStyle));
         LayoutInflater inflater = getLayoutInflater();
         View dialogLayout = inflater.inflate(R.layout.change_units_dialog_layout, null);
+
+        Spinner windUnitsSpinner = (Spinner) dialogLayout.findViewById(R.id.wind_speed_units_spinner);
+        Spinner temperatureUnitsSpinner = (Spinner) dialogLayout.findViewById(R.id.temperature_units_spinner);
+        ArrayAdapter<CharSequence> adapterWindUnits = ArrayAdapter.createFromResource(this,
+                R.array.wind_units_array, R.layout.spinner_row_layout);
+        adapterWindUnits.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        windUnitsSpinner.setAdapter(adapterWindUnits);
+
+        ArrayAdapter<CharSequence> adapterTemperatureUnits = ArrayAdapter.createFromResource(this,
+                R.array.temperature_units_array, R.layout.spinner_row_layout);
+        adapterTemperatureUnits.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        temperatureUnitsSpinner.setAdapter(adapterTemperatureUnits);
+        temperatureUnitsSpinner.setSelection(0);
+
         builder.setView(dialogLayout)
                 .setTitle("Change units")
-                .setPositiveButton("Ok", (dialog, which) -> {
-
+                .setPositiveButton("Ok", (dialog, which) -> {;
+                    String windUnit = (String) windUnitsSpinner.getSelectedItem();
+                    String temperatureUnit = (String) temperatureUnitsSpinner.getSelectedItem();
+                    saveChosenunits(windUnit, temperatureUnit);
+                    Log.i(TAG, "wind unit: " + windUnit + ", temperature unit: " + temperatureUnit);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
 
                 });
 
-        Spinner windUnitsSpinner = (Spinner) dialogLayout.findViewById(R.id.wind_speed_units_spinner);
-        Spinner temperatureUnitsSpinner = (Spinner) dialogLayout.findViewById(R.id.temperature_units_spinner);
-
-        ArrayAdapter<CharSequence> adapterWindUnits = ArrayAdapter.createFromResource(this,
-                R.array.wind_units_array, android.R.layout.simple_spinner_item);
-        adapterWindUnits.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        windUnitsSpinner.setAdapter(adapterWindUnits);
-
-        ArrayAdapter<CharSequence> adapterTemperatureUnits = ArrayAdapter.createFromResource(this,
-                R.array.temperature_units_array, android.R.layout.simple_spinner_item);
-        adapterTemperatureUnits.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        temperatureUnitsSpinner.setAdapter(adapterTemperatureUnits);
-
         builder.create();
         builder.show();
     }
+
+    private void saveChosenunits(String windUnit, String temperatureUnit) {
+        SharedPreferences sharedPreferences = getSharedPreferences(CONFIG.UNITS_PREFERENCES_KEY, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(CONFIG.WIND_UNIT_KEY, windUnit);
+        editor.putString(CONFIG.TEMPERATURE_UNIT_KEY, temperatureUnit);
+        editor.apply();
+    }
+
     private void showSetWindAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogStyle));
         LayoutInflater inflater = getLayoutInflater();

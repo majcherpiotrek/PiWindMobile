@@ -19,7 +19,10 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
-            android:text="@string/choose_wind_speed_units" />
+            android:text="@string/choose_wind_speed_units"
+            android:layout_marginRight="27dp"
+            android:layout_marginEnd="27dp"
+            android:layout_centerInParent="true"/>
 
         <Spinner
             android:id="@+id/wind_speed_units_spinner"
@@ -28,7 +31,8 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_toEndOf="@id/wind_speed_units_label"
-            android:layout_toRightOf="@id/wind_speed_units_label"/>
+            android:layout_toRightOf="@id/wind_speed_units_label"
+            style="@style/Base.Widget.AppCompat.Spinner.Underlined"/>
     </RelativeLayout>
 
 
@@ -44,7 +48,10 @@
             android:layout_height="wrap_content"
             android:text="@string/choose_temperature_units"
             android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"/>
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_centerInParent="true"/>
 
         <Spinner
             android:id="@+id/temperature_units_spinner"
@@ -53,7 +60,8 @@
             android:layout_toRightOf="@id/temperature_units_label"
             android:layout_toEndOf="@id/temperature_units_label"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"/>
+            android:layout_alignParentRight="true"
+            style="@style/Base.Widget.AppCompat.Spinner.Underlined"/>
 
     </RelativeLayout>
 

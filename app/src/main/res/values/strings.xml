@@ -37,4 +37,11 @@
     <string name="action_logout">Logout</string>
     <string name="choose_wind_speed_units">Wind speed unit:</string>
     <string name="choose_temperature_units">Temperature unit:</string>
+
+    <string name="unit_knots">kts</string>
+    <string name="unit_mps">m/s</string>
+    <string name="unit_kmh">km/h</string>
+
+    <string name="unit_fahrenheit">\u2109</string>
+    <string name="unit_celsius">\u2103</string>
 </resources>
