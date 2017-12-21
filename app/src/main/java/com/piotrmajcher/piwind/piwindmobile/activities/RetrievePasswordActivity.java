@@ -22,9 +22,6 @@ import com.piotrmajcher.piwind.piwindmobile.R;
 import com.piotrmajcher.piwind.piwindmobile.services.AuthService;
 import com.piotrmajcher.piwind.piwindmobile.services.impl.AuthServiceImpl;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class RetrievePasswordActivity extends AppCompatActivity {
 
     private static final String TAG = RetrievePasswordActivity.class.getName();
@@ -85,12 +82,12 @@ public class RetrievePasswordActivity extends AppCompatActivity {
         toastMsg = response;
         Toast.makeText(getApplicationContext(), toastMsg, Toast.LENGTH_LONG).show();
         progressDialog.dismiss();
-        redirectToChangePasswordActivity();
+        redirectToConfirmRetrievePasswordActivity();
     }
 
-    private void redirectToChangePasswordActivity() {
-        //Intent confirmEmailActivityIntent = new Intent(this, ConfirmEmailActivity.class);
-        //startActivity(confirmEmailActivityIntent);
+    private void redirectToConfirmRetrievePasswordActivity() {
+        Intent confirmRetrievePasswordActivityIntent = new Intent(this, ConfirmRetrievePasswordActivity.class);
+        startActivity(confirmRetrievePasswordActivityIntent);
     }
 
     private void initViews() {

@@ -47,4 +47,7 @@
     <string name="retrieve_your_password">Retrieve your password</string>
     <string name="your_email_or_username">Your email or username</string>
     <string name="send">Send </string>
+    <string name="token">Token</string>
+    <string name="change_password_prompt">Change your password using the token received on your email address</string>
+    <string name="change_password">Change password</string>
 </resources>
