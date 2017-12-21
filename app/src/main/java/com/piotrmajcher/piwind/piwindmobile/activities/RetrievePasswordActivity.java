@@ -97,5 +97,10 @@ public class RetrievePasswordActivity extends AppCompatActivity {
         usernameOrEmailInput = (EditText) findViewById(R.id.email_or_username_input);
         errorLabel = (TextView) findViewById(R.id.retrieve_password_error_label);
         retrievePasswordButton = (Button) findViewById(R.id.retrieve_password_button);
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar); // Attaching the layout to the toolbar object
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 }
