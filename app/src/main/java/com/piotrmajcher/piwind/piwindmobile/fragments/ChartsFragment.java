@@ -40,8 +40,8 @@ import java.util.UUID;
 
 public class ChartsFragment extends Fragment {
     private static final String TAG = ChartsFragment.class.getName();
-    private static final int samples = 20;
-    private static final int intervalMinutes = 5; // TODO 15 normally
+    private static final int samples = 10;
+    private static final int intervalMinutes = 1; // TODO 15 normally
     private UUID stationId;
     private LineChart chart;
     private List<ChartData> windChartData;
@@ -100,8 +100,8 @@ public class ChartsFragment extends Fragment {
                         for (ChartDataTO to : tos) {
                             result.add(new ChartData(to));
                         }
-//                        windChartData = result;
-                        windChartData = generateRandomData(20, 5 * 60 * 1000);
+                        windChartData = result;
+//                        windChartData = generateRandomData(20, 5 * 60 * 1000);
                         LineData lineData = createWindChartLineData(windChartData);
                         setupAxis(chart, windChartData);
                         setupChart(chart, lineData);
@@ -166,8 +166,8 @@ public class ChartsFragment extends Fragment {
         xAxis.setDrawGridLines(false);
         xAxis.setValueFormatter(new DateTimeXAxisValueFormatter(createDatesXAxisLabels(windChartData)));
 
-//        chart.getAxisLeft().setAxisMinimum(0f);
-//        chart.getAxisRight().setAxisMinimum(0f);
+        chart.getAxisLeft().setAxisMinimum(0f);
+        chart.getAxisRight().setAxisMinimum(0f);
     }
 
     private Date[] createDatesXAxisLabels(List<ChartData> data) {

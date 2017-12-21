@@ -42,6 +42,8 @@ public class MeteoDetailsFragment extends Fragment {
     private TextView windDirectionDescTextView;
     private TextView temperatureDataTextView;
     private TextView temperatureDataDescTextView;
+    private TextView waterConditionsDescTextView;
+    private TextView equipmentSuggestionTextView;
     private ImageView snapshotImageView;
     private SnapshotUpdateListener snapshotUpdateListener;
     private MeteoDataUpdateListener meteoDataUpdateListener;
@@ -54,10 +56,13 @@ public class MeteoDetailsFragment extends Fragment {
     private Double windFactor;
     private MeteoData meteoData;
 
-    public static MeteoDetailsFragment newInstance(String meteoStationId) {
+    public static MeteoDetailsFragment newInstance(String meteoStationId, String temperatureUnit, String windUnit, Double windFactor) {
         MeteoDetailsFragment f = new MeteoDetailsFragment();
         Bundle args = new Bundle();
         args.putSerializable("meteoStationId", meteoStationId);
+        args.putDouble("windFactor", windFactor);
+        args.putString("temperatureUnit", temperatureUnit);
+        args.putString("windUnit", windUnit);
         f.setArguments(args);
         return f;
     }
@@ -67,15 +72,15 @@ public class MeteoDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         Bundle args = getArguments();
-        if (args != null  && args.getString("meteoStationId") != null) {
+        if (args != null) {
             meteoStationId = args.getString("meteoStationId");
+            windUnit = args.getString("windUnit");
+            windFactor = args.getDouble("windFactor");
+            temperatureUnit = args.getString("temperatureUnit");
 
         } else {
             throw new RuntimeException("Unexpected state occured. Null station object passed to station details view.");
         }
-
-
-        setUpWindAndTemperatureUnits();
     }
 
     private void setUpWindAndTemperatureUnits() {
@@ -159,6 +164,8 @@ public class MeteoDetailsFragment extends Fragment {
             }
             final String temperatureData = df.format(temp) + temperatureUnit;
             final String temperatureDataDesc = meteoData.getTemperatureConditionsDescription();
+            final String waterconditionsDesc = meteoData.getWaterConditionsDescription();
+            final String equipmentSuggestion = meteoData.getEquipmentSuggestion();
 
             getActivity().runOnUiThread(() -> {
                 windSpeedTextView.setText(windSpeed);
@@ -167,6 +174,8 @@ public class MeteoDetailsFragment extends Fragment {
                 windBftTextView.setText(windBft);
                 temperatureDataTextView.setText(temperatureData);
                 temperatureDataDescTextView.setText(temperatureDataDesc);
+                waterConditionsDescTextView.setText(waterconditionsDesc);
+                equipmentSuggestionTextView.setText(equipmentSuggestion);
             });
         }
     }
@@ -207,6 +216,8 @@ public class MeteoDetailsFragment extends Fragment {
         snapshotImageView = (ImageView) view.findViewById(R.id.snapshot);
         temperatureDataTextView = (TextView) view.findViewById(R.id.therm_data);
         temperatureDataDescTextView = (TextView) view.findViewById(R.id.therm_desc);
+        waterConditionsDescTextView = (TextView) view.findViewById(R.id.waves_description);
+        equipmentSuggestionTextView= (TextView) view.findViewById(R.id.board_sail_advice);
     }
 
 

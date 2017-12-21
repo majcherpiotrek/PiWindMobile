@@ -18,6 +18,10 @@ public class MeteoData {
 
     private String temperatureConditionsDescription;
 
+    private String waterConditionsDescription;
+
+    private String equipmentSuggestion;
+
     public MeteoData(MeteoDataTO meteoDataTO) {
         temperature = meteoDataTO.getTemperature();
         windSpeed = meteoDataTO.getWindSpeed();
@@ -25,6 +29,8 @@ public class MeteoData {
         windDirectionDescription = meteoDataTO.getWindDirectionDescription();
         beaufortCategoryDescription = meteoDataTO.getBeaufortCategoryDescription();
         temperatureConditionsDescription = meteoDataTO.getTemperatureConditionsDescription();
+        waterConditionsDescription = meteoDataTO.getWaterConditionsDescription();
+        equipmentSuggestion = meteoDataTO.getEquipmentSuggestion();
     }
 
     public Double getTemperature() {
@@ -75,6 +81,22 @@ public class MeteoData {
         this.temperatureConditionsDescription = temperatureConditionsDescription;
     }
 
+    public String getWaterConditionsDescription() {
+        return waterConditionsDescription;
+    }
+
+    public void setWaterConditionsDescription(String waterConditionsDescription) {
+        this.waterConditionsDescription = waterConditionsDescription;
+    }
+
+    public String getEquipmentSuggestion() {
+        return equipmentSuggestion;
+    }
+
+    public void setEquipmentSuggestion(String equipmentSuggestion) {
+        this.equipmentSuggestion = equipmentSuggestion;
+    }
+
     @Override
     public String toString() {
         return "MeteoData{" +
@@ -84,6 +106,8 @@ public class MeteoData {
                 ", windDirectionDescription='" + windDirectionDescription + '\'' +
                 ", beaufortCategoryDescription='" + beaufortCategoryDescription + '\'' +
                 ", temperatureConditionsDescription='" + temperatureConditionsDescription + '\'' +
+                ", waterConditionsDescription='" + waterConditionsDescription + '\'' +
+                ", equipmentSuggestion='" + equipmentSuggestion + '\'' +
                 '}';
     }
 }

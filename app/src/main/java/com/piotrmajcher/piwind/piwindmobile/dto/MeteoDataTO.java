@@ -16,6 +16,10 @@ public class MeteoDataTO {
 
     private String temperatureConditionsDescription;
 
+    private String waterConditionsDescription;
+
+    private String equipmentSuggestion;
+
     public double getTemperature() {
         return temperature;
     }
@@ -64,11 +68,33 @@ public class MeteoDataTO {
         this.temperatureConditionsDescription = temperatureConditionsDescription;
     }
 
+    public String getWaterConditionsDescription() {
+        return waterConditionsDescription;
+    }
+
+    public void setWaterConditionsDescription(String waterConditionsDescription) {
+        this.waterConditionsDescription = waterConditionsDescription;
+    }
+
+    public String getEquipmentSuggestion() {
+        return equipmentSuggestion;
+    }
+
+    public void setEquipmentSuggestion(String equipmentSuggestion) {
+        this.equipmentSuggestion = equipmentSuggestion;
+    }
+
     @Override
     public String toString() {
-        return "MeteoDataTOAndroid [temperature=" + temperature + ", windSpeed=" + windSpeed + ", dateTime=" + dateTime
-                + ", windDirectionDescription=" + windDirectionDescription + ", beaufortCategoryDescription="
-                + beaufortCategoryDescription + ", temperatureConditionsDescription=" + temperatureConditionsDescription
-                + "]";
+        return "MeteoDataTO{" +
+                "temperature=" + temperature +
+                ", windSpeed=" + windSpeed +
+                ", dateTime=" + dateTime +
+                ", windDirectionDescription='" + windDirectionDescription + '\'' +
+                ", beaufortCategoryDescription='" + beaufortCategoryDescription + '\'' +
+                ", temperatureConditionsDescription='" + temperatureConditionsDescription + '\'' +
+                ", waterConditionsDescription='" + waterConditionsDescription + '\'' +
+                ", equipmentSuggestion='" + equipmentSuggestion + '\'' +
+                '}';
     }
 }
