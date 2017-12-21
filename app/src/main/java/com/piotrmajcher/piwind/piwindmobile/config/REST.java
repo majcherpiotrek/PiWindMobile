@@ -14,6 +14,6 @@ public interface REST {
     String REQUEST_NOTIFICATIONS_ENDPOINT = "/stations/request-notifications";
     String CANCEL_NOTIFICATIONS_ENDPOINT = "/stations/cancel-notifications";
     String RETRIEVE_PASSWORD_USERNAME_URL = "/password/retrieve/username/";
-    String RETRIEVE_PASSWORD_EMAIL_URL = "/password/retrieve/username/email/";
+    String RETRIEVE_PASSWORD_EMAIL_URL = "/password/retrieve/email/";
     String CHANGE_PASSWORD_URL = "/password/retrieve/newpassword";
 }
