@@ -139,7 +139,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_horizontal"
-                    android:maxLines="1"/>
+                    android:maxLines="2"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -180,8 +180,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_horizontal"
-                    android:maxLines="1"
-                    android:text="Mostly choppy with this wind driection."/>
+                    android:maxLines="1"/>
             </LinearLayout>
         </LinearLayout>
 
@@ -221,8 +220,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_horizontal"
-                    android:maxLines="1"
-                    android:text="Board: > 100l, sail: 4.8m\u00B2 - 5.2m\u00B2"/>
+                    android:maxLines="1"/>
             </LinearLayout>
         </LinearLayout>
 

@@ -32,7 +32,6 @@
     <string name="confirmation_code_hint">Enter the confirmation code here</string>
     <string name="confirm_email">Confirm email</string>
     <string name="confirm_password">Confirm password</string>
-    <string name="username_or_email">Username or email</string>
     <string name="action_set_alert">Setup wind alert</string>
     <string name="action_logout">Logout</string>
     <string name="choose_wind_speed_units">Wind speed unit:</string>
@@ -44,4 +43,11 @@
 
     <string name="unit_fahrenheit">\u2109</string>
     <string name="unit_celsius">\u2103</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="retrieve_your_password">Retrieve your password</string>
+    <string name="your_email_or_username">Your email or username</string>
+    <string name="send">Send </string>
+    <string name="token">Token</string>
+    <string name="change_password_prompt">Change your password using the token received on your email address</string>
+    <string name="change_password">Change password</string>
 </resources>

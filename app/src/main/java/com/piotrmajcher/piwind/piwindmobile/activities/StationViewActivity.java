@@ -1,5 +1,6 @@
 package com.piotrmajcher.piwind.piwindmobile.activities;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -35,6 +36,7 @@ import com.piotrmajcher.piwind.piwindmobile.services.impl.MeteoStationServiceImp
 
 public class StationViewActivity extends AppCompatActivity {
 
+    private static final int MAX_WIND_LIMIT_MPS = 40;
     private static final String TAG = StationViewActivity.class.getName();
 
     private SectionsPageAdapter mSectionsPageAdapter;
@@ -45,6 +47,9 @@ public class StationViewActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private RequestQueue requestQueue;
     private MeteoStationService meteoStationService;
+    private String windUnit;
+    private Double windFactor = 1.0;
+    private String temperatureUnit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +68,7 @@ public class StationViewActivity extends AppCompatActivity {
             getSupportActionBar().setTitle(meteoStationTO.getName());
         }
 
+        setUpWindAndTemperatureUnits();
         mSectionsPageAdapter = new SectionsPageAdapter(getSupportFragmentManager());
         setupSectionsPageAdapter(mSectionsPageAdapter);
 
@@ -85,8 +91,6 @@ public class StationViewActivity extends AppCompatActivity {
 
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-
-
     }
 
 
@@ -130,6 +134,11 @@ public class StationViewActivity extends AppCompatActivity {
                 return true;
             }
 
+            case R.id.action_logout: {
+                redirectToLoginActivity();
+                return true;
+            }
+
 
             default: {
                 // If we got here, the user's action was not recognized.
@@ -162,7 +171,7 @@ public class StationViewActivity extends AppCompatActivity {
                 .setPositiveButton("Ok", (dialog, which) -> {;
                     String windUnit = (String) windUnitsSpinner.getSelectedItem();
                     String temperatureUnit = (String) temperatureUnitsSpinner.getSelectedItem();
-                    saveChosenunits(windUnit, temperatureUnit);
+                    saveChosenUnits(windUnit, temperatureUnit);
                     Log.i(TAG, "wind unit: " + windUnit + ", temperature unit: " + temperatureUnit);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
@@ -173,23 +182,62 @@ public class StationViewActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void saveChosenunits(String windUnit, String temperatureUnit) {
+    private void saveChosenUnits(String windUnit, String temperatureUnit) {
         SharedPreferences sharedPreferences = getSharedPreferences(CONFIG.UNITS_PREFERENCES_KEY, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
+        this.windUnit = windUnit;
+        if (this.windUnit.equals(getString(R.string.unit_knots))) {
+            this.windFactor = CONFIG.MPS_TO_KTS;
+        } else if (this.windUnit.equals(getString(R.string.unit_kmh))) {
+            this.windFactor = CONFIG.MPS_TO_KMH;
+        } else {
+            this.windFactor = 1.0;
+        }
         editor.putString(CONFIG.WIND_UNIT_KEY, windUnit);
         editor.putString(CONFIG.TEMPERATURE_UNIT_KEY, temperatureUnit);
         editor.apply();
     }
 
+    private void setUpWindAndTemperatureUnits() {
+        SharedPreferences sharedPreferences = getSharedPreferences(CONFIG.UNITS_PREFERENCES_KEY, MODE_PRIVATE);
+        windUnit = sharedPreferences.getString(CONFIG.WIND_UNIT_KEY,null);
+        temperatureUnit = sharedPreferences.getString(CONFIG.TEMPERATURE_UNIT_KEY, null);
+        if (windUnit == null || temperatureUnit == null) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            windUnit = getString(R.string.unit_knots);
+            windFactor = CONFIG.MPS_TO_KTS;
+            temperatureUnit = getString(R.string.unit_celsius);
+            editor.putString(CONFIG.WIND_UNIT_KEY, windUnit);
+            editor.putString(CONFIG.TEMPERATURE_UNIT_KEY, temperatureUnit);
+            editor.apply();
+        } else {
+            if (this.windUnit.equals(getString(R.string.unit_knots))) {
+                this.windFactor = CONFIG.MPS_TO_KTS;
+            } else if (this.windUnit.equals(getString(R.string.unit_kmh))) {
+                this.windFactor = CONFIG.MPS_TO_KMH;
+            } else {
+                this.windFactor = 1.0;
+            }
+        }
+    }
+
     private void showSetWindAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogStyle));
         LayoutInflater inflater = getLayoutInflater();
+
         View dialogLayout = inflater.inflate(R.layout.windlimit_dialog_layout, null);
+        SeekBar seekBar = (SeekBar) dialogLayout.findViewById(R.id.wind_limit_seekbar);
+        TextView selectedWindLimitTextView = (TextView) dialogLayout.findViewById(R.id.selected_wind_value);
+
+        seekBar.setOnSeekBarChangeListener(getWindLimitSeekbarChangeListener(selectedWindLimitTextView));
+        seekBar.setMax((int) (MAX_WIND_LIMIT_MPS * windFactor));
+        selectedWindLimitTextView.setText(createWindLimitText(seekBar.getProgress()));
+
+
         builder.setView(dialogLayout)
                 .setTitle("Setup wind alert")
                 .setMessage("Choose the wind limit for alerts")
                 .setPositiveButton("Ok", (dialog, which) -> {
-                    SeekBar seekBar = (SeekBar) dialogLayout.findViewById(R.id.wind_limit_seekbar);
                     Log.i(TAG, "Fetched value: " + seekBar.getProgress());
                     if (!isUserAlreadySubscribedToStationTopic(meteoStationTO)) {
                         susbscribeToFirebase(meteoStationTO);
@@ -209,10 +257,6 @@ public class StationViewActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", (dialog, which) -> {
                     // Does nothing
                 });
-        SeekBar seekBar = (SeekBar) dialogLayout.findViewById(R.id.wind_limit_seekbar);
-        TextView selectedWindLimitTextView = (TextView) dialogLayout.findViewById(R.id.selected_wind_value);
-        selectedWindLimitTextView.setText(createWindLimitText(seekBar.getProgress()));
-        seekBar.setOnSeekBarChangeListener(getWindLimitSeekbarChangeListener(selectedWindLimitTextView));
 
         builder.create();
         builder.show();
@@ -293,13 +337,13 @@ public class StationViewActivity extends AppCompatActivity {
         StringBuilder sb = new StringBuilder();
         sb.append("Wind limit: ");
         sb.append(String.valueOf(progress));
-        sb.append(" mps");
+        sb.append(" " + windUnit);
         return sb.toString();
     }
 
 
     private void setupSectionsPageAdapter(SectionsPageAdapter adapter) {
-        adapter.addFragment(MeteoDetailsFragment.newInstance(meteoStationTO.getId().toString()), "Meteo");
+        adapter.addFragment(MeteoDetailsFragment.newInstance(meteoStationTO.getId().toString(), temperatureUnit, windUnit, windFactor), "Meteo");
         RequestQueue requestQueue = ApplicationController.getInstance(getApplicationContext()).getRequestQueue();
         adapter.addFragment(ChartsFragment.newInstance(meteoStationTO.getId().toString(), token, requestQueue), "Charts");
     }
@@ -330,5 +374,12 @@ public class StationViewActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(meteoStationTO.getId().toString());
         editor.apply();
+    }
+
+    private void redirectToLoginActivity() {
+        Intent loginActivityIntent = new Intent(this, LoginActivity.class);
+        loginActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(loginActivityIntent);
+        this.finish();
     }
 }

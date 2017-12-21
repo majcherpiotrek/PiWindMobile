@@ -30,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passwordInput;
     private Button loginButton;
     private TextView register;
+    private TextView forgotPassword;
     private TextView errorLabel;
     private AuthService authService;
     private Intent intent;
@@ -46,6 +47,12 @@ public class LoginActivity extends AppCompatActivity {
         intent = getIntent();
         loginButton.setOnClickListener(v -> handleLoginRequest());
         register.setOnClickListener(v -> startRegistrationActivity());
+        forgotPassword.setOnClickListener(v -> startRetrievePasswordAcctivity());
+    }
+
+    private void startRetrievePasswordAcctivity() {
+        Intent intentRetrievePassword = new Intent(this, RetrievePasswordActivity.class);
+        startActivity(intentRetrievePassword);
     }
 
     private void startRegistrationActivity() {
@@ -92,7 +99,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private void validateCredentials(String username, String password) {
         if (username.length() == 0 || password.length() == 0) {
-            // TODO set error label text
+            errorLabel.setText("Username and password cannot be empty!");
+            errorLabel.setVisibility(View.VISIBLE);
         } else {
             try {
                 authService.login(
@@ -133,7 +141,8 @@ public class LoginActivity extends AppCompatActivity {
             ApplicationController.getInstance(getApplicationContext()).setToken(token);
             startActivityBasedOnIntent(intent);
         } catch (JSONException e) {
-            //TODO set error label text
+            errorLabel.setText("Unexpected error");
+            errorLabel.setVisibility(View.VISIBLE);
             Log.e(TAG, "Could not parse response");
         }
     }
@@ -143,6 +152,7 @@ public class LoginActivity extends AppCompatActivity {
         passwordInput = (EditText) findViewById(R.id.password_input);
         loginButton = (Button) findViewById(R.id.login_button);
         register = (TextView) findViewById(R.id.register_text);
+        forgotPassword = (TextView) findViewById(R.id.retrieve_password_text);
         errorLabel = (TextView) findViewById(R.id.login_error_label);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar); // Attaching the layout to the toolbar object

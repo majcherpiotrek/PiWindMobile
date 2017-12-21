@@ -21,4 +21,14 @@ public interface AuthService {
                Response.Listener<JSONObject> responseListener,
                Response.ErrorListener errorListener
     ) throws JSONException;
+
+    void retrievePassword(String usernameOrEmail,
+                      Response.Listener<String> responseListener,
+                      Response.ErrorListener errorListener
+    );
+
+    void changePassword(String token, String password, String matchingPassword,
+                                 Response.Listener<JSONObject> responseListener,
+                                 Response.ErrorListener errorListener
+    ) throws JSONException;
 }

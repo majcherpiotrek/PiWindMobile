@@ -31,6 +31,9 @@ public class AuthServiceImpl implements AuthService {
     private static final String REGISTER_USER_URL = REST.BASE_URL + REST.REGISTER_USER_URL;
     private static final String CONFIRM_EMAIL_URL = REST.BASE_URL + REST.CONFIRM_EMAIL_URL;
     private static final String LOGIN_URL = REST.BASE_URL + REST.LOGIN_URL;
+    private static final String RETRIEVE_PASSWORD_USERNAME_URL = REST.BASE_URL + REST.RETRIEVE_PASSWORD_USERNAME_URL;
+    private static final String RETRIEVE_PASSWORD_EMAIL_URL = REST.BASE_URL + REST.RETRIEVE_PASSWORD_EMAIL_URL;
+    private static final String CHANGE_PASSWORD_URL = REST.BASE_URL + REST.CHANGE_PASSWORD_URL;
     private RequestQueue requestQueue;
 
 
@@ -119,6 +122,49 @@ public class AuthServiceImpl implements AuthService {
         requestQueue.add(request);
         Log.i(TAG, "Request sent.");
     }
+
+    @Override
+    public void retrievePassword(String usernameOrEmail, Response.Listener<String> responseListener, Response.ErrorListener errorListener) {
+        String url = "";
+
+        if (usernameOrEmail.contains("@")) {
+            url = RETRIEVE_PASSWORD_EMAIL_URL + usernameOrEmail;
+        } else {
+            url = RETRIEVE_PASSWORD_USERNAME_URL + usernameOrEmail;
+        }
+
+        StringRequest request = new StringRequest(
+                Request.Method.GET,
+                url,
+                responseListener,
+                errorListener);
+
+        request.setRetryPolicy(getRetryPolicy());
+        Log.i(TAG, "Sending request to: " + request.getUrl());
+        requestQueue.add(request);
+        Log.i(TAG, "Request sent.");
+    }
+
+    @Override
+    public void changePassword(String token, String password, String matchingPassword, Response.Listener<JSONObject> responseListener, Response.ErrorListener errorListener) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("token", token);
+        jsonObject.put("password", password);
+        jsonObject.put("matchingPassword", matchingPassword);
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                CHANGE_PASSWORD_URL,
+                jsonObject,
+                responseListener,
+                errorListener
+        );
+
+        Log.i(TAG, "Sending request to: " + request.getUrl());
+        requestQueue.add(request);
+        Log.i(TAG, "Request sent.");
+    }
+
 
     @NonNull
     private RetryPolicy getRetryPolicy() {
